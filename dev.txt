@@ -1,0 +1,10 @@
+Ce fichier servira d'échange asynchrone pour tous les dev travaillants sur ce projet:
+
+Voici une requete SQL qui me permettait de créer la bdd sur l'ancien prog:
+"CREATE TABLE oracle(
+id INTEGER PRIMARY KEY,
+chan_orig TEXT,
+auteur TEXT,
+link TEXT,
+keywords TEXT,
+date TEXT)"
