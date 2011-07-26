@@ -15,7 +15,7 @@
 #   - Ajouter une gestion des exceptions.
 
 
-VERSION = "0.0.9"
+VERSION = "0.0.11"
 
 import re, os, sys, socket, time, sqlite3
 
@@ -35,10 +35,15 @@ class Oracle:
         if not database:
             oraclePath = os.path.join(os.path.expanduser("~"), ".Oracle")
             if not os.path.exists(oraclePath):
-                os.mkdir(oraclePath, 755)
+                os.mkdir(oraclePath)
             database = os.path.join(oraclePath, "Oracle.sq3")
         if not os.path.exists(database):
-            os.system("echo 'create table %s(url varchar(100));'|sqlite %s"%(self.name, database)) # Unix only, please fill in table fields
+            os.system("echo 'create table %s(id INTEGER PRIMARY KEY,\
+chan_orig TEXT,\
+auteur TEXT,\
+link TEXT,\
+keywords TEXT,\
+date TEXT);'|sqlite %s"%(self.name, database)) # Unix only
         self.conn = sqlite3.connect(str(database))
         self.db = self.conn.cursor()
 
