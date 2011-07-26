@@ -8,3 +8,13 @@ auteur TEXT,
 link TEXT,
 keywords TEXT,
 date INTEGER)"
+
+Ajout de tags à la dernière URL citée :
++tag
++tag1 +tag2
+
+Recherche simple :
+!search tag
+!search tag1 tag2
+
+Ajouter une recherche par date et par personne.

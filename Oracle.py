@@ -15,7 +15,7 @@
 #   - Ajouter une gestion des exceptions.
 
 
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 
 import re, os, sys, socket, time, sqlite3
 
@@ -55,6 +55,8 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
                        "(?i) :!quit$":self.bye,
                        "(?i) :!goto #[-_#a-zA-Z0-9]{1,49}$":self.goto,
                        "(?i)(https?|ftp)://[a-z0-9\\-.@:]+\\.[a-z]{2,3}([.,;:]*[a-z0-9\\-_?'/\\\\+&%$#=~])*":self.url,
+                       "(?i) :(\+[a-z0-9]+ ?)+$":self.tag,
+                       "(?i) :!search( [a-z0-9]+)+$":self.search,
                        " :End of /MOTD command\\.":self.join,
                        "^ERROR :Closing Link: ":self.stop}
 
@@ -122,17 +124,25 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
             if len(self.chan) == 0:
                 self.stop()
 
+# Here are Oracle's core methods :
+
     def url(self, msg, match):
         """Detects and stores URLs"""
         chan = self.gettarget(msg)
         self.db.execute("INSERT INTO %s VALUES (NULL,'%s','%s', '%s', '', %i);"%(self.name,
-                                                                             chan,
-                                                                             msg[1:msg.find("!")],
-                                                                             msg[match[0]:match[1]],
-                                                                             int(time.time())))
+                                                                                 chan,
+                                                                                 msg[1:msg.find("!")],
+                                                                                 msg[match[0]:match[1]],
+                                                                                 int(time.time())))
         self.conn.commit()
-        self.sendTo(chan,
-                    msg[match[0]:match[1]])
+
+    def tag(self, msg, match):
+        """Adds tag(s) to last URL"""
+        pass
+
+    def search(self, msg, match):
+        """Searches for an URL with the given tags"""
+        pass
 
     def help(self, msg, match):
         """Displays a minimal manual"""
@@ -145,7 +155,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
         """Displays version data"""
         self.sendTo(self.gettarget(msg),"""Oracle
 v%s
-Non-functional beta version.
+Semi-functional beta version.
 http://hgpub.druil.net/Oracle/"""%VERSION)
 
 
