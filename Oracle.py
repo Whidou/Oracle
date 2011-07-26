@@ -17,7 +17,7 @@ import random, re, sys, socket, time, sqlite3
 
 
 
-class BotIrc:
+class IrcBot:
 
     def __init__(self, network="irc.netrusk.net", chan, name="Oracle"):
         self.network = network
@@ -53,7 +53,7 @@ class BotIrc:
                         if(match):
                             self.orders[j](i, match.span())
                 time.sleep(freq)
-            self.irc.shutdown(socket.SHUT_RDWR)
+                self.irc.shutdown(socket.SHUT_RDWR)
 
     def sendTo(self, target, message):
         """Sends a message to the choosen target"""
@@ -93,7 +93,7 @@ class BotIrc:
     def bye(self, msg, match):
         target = self.gettarget(msg)
         if(target.lower() in map(lambda x:x.lower(), self.chan)):
-            self.sendToServ("PART %s :Twenty-sider, mother fucker !"%target)
+            self.sendToServ("PART %s :ICI UN MESSAGE DE QUIT"%target)
             self.chan.remove(target)
             if len(self.chan) == 0:
                 self.stop()
@@ -107,4 +107,4 @@ class BotIrc:
 # Main :
 
 if __name__ == "__main__":
-    IrcBot(sys.argv[1], sys.argv[2], sys.argv[3], namefile).mainloop()
+    IrcBot(sys.argv[1], sys.argv[2], sys.argv[3]).mainloop()
