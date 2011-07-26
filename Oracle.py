@@ -13,14 +13,9 @@
 # -- Idées --
 #   - lorsque un lien est posté, le bot stock et demande en query des mots cle
 #   - Ajouter une gestion des exceptions.
-#   - Ajouter la création de la bdd
 
 
-# -- Notes --
-#   - Connexions à la bdd temporairement désactivées pour le test de la regex url
-
-
-VERSION = "0.0.6"
+VERSION = "0.0.7"
 
 import re, os, sys, socket, time, sqlite3
 
@@ -38,10 +33,14 @@ class Oracle:
         self.stop()
         self.bits = {}
         if not database:
-            database = os.path.join("~", # Not sure if this one will work on win$
-                                    ".Oracle",
-                                    "%s.sq3"%name)
-#        self.conn = sqlite3.connect(str(database)) # What if the database doesn't exist yet ?
+            oraclePath = os.path.join(os.path.expanduser("~"), ".Oracle")
+            if not os.path.exists(oraclePath):
+                os.mkdir(oraclePath, 755)
+            database = os.path.join(oraclePath, "Oracle.sq3")
+        if not os.path.exists(database):
+            os.system("echo 'create table %s(url varchar(100));'|sqlite %s"%(self.name, database)) # Unix only, please fill in table fields
+        self.conn = sqlite3.connect(str(database))
+        self.db = self.conn.cursor()
 
     def configure(self):
         """Links commands to methods"""
@@ -50,7 +49,7 @@ class Oracle:
                        "(?i) :!version$":self.version,
                        "(?i) :!quit$":self.bye,
                        "(?i) :!goto #[-_#a-zA-Z0-9]{1,49}$":self.goto,
-                       "(?i)(https?|ftp)://[a-z0-9\\-.]+\\.[a-z]{2,3}(\\.?[a-z0-9\\-_?,'/\\\\+&%$#=~])*":self.url,
+                       "(?i)(https?|ftp)://[a-z0-9\\-.]+\\.[a-z]{2,3}([.,;:]?[a-z0-9\\-_?'/\\\\+&%$#=~])*":self.url,
                        " :End of /MOTD command\\.":self.join,
                        "^ERROR :Closing Link: ":self.stop}
 
@@ -70,7 +69,8 @@ class Oracle:
                             self.orders[j](i, match.span())
                 time.sleep(freq)
             self.irc.shutdown(socket.SHUT_RDWR)
-#            self.conn.close()
+            self.db.close()
+            self.conn.close()
 
     def sendTo(self, target, message):
         """Sends a message to the choosen target"""
@@ -144,4 +144,4 @@ if __name__ == "__main__":
         database = sys.argv[4]  # database in ~/.Oracle or another one.
     Oracle(sys.argv[1], sys.argv[2], sys.argv[3], database).mainloop()
 # Usage: oracle SERVER CHANNEL BOTNAME [DATABASE]
-# If no database is specified, ~/.Oracle/BOTNAME.sq3 will be used
+# If no database is specified, ~/.Oracle/Oracle.sq3 will be used
