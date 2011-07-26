@@ -10,12 +10,17 @@
 ###########################################################################
 
 
-
 # -- Idées --
-# - lorsque un lien est posté, le bot stock et demande en query des mots cle
-# - Ajouter une gestion des exceptions.
+#   - lorsque un lien est posté, le bot stock et demande en query des mots cle
+#   - Ajouter une gestion des exceptions.
+#   - Ajouter la création de la bdd
 
-VERSION = "0.0.5"
+
+# -- Notes --
+#   - Connexions à la bdd temporairement désactivées pour le test de la regex url
+
+
+VERSION = "0.0.6"
 
 import re, os, sys, socket, time, sqlite3
 
@@ -36,7 +41,7 @@ class Oracle:
             database = os.path.join("~", # Not sure if this one will work on win$
                                     ".Oracle",
                                     "%s.sq3"%name)
-        self.conn = sqlite3.connect(str(database)) # What if the database doesn't exist yet ?
+#        self.conn = sqlite3.connect(str(database)) # What if the database doesn't exist yet ?
 
     def configure(self):
         """Links commands to methods"""
@@ -45,6 +50,7 @@ class Oracle:
                        "(?i) :!version$":self.version,
                        "(?i) :!quit$":self.bye,
                        "(?i) :!goto #[-_#a-zA-Z0-9]{1,49}$":self.goto,
+                       "(?i)(https?|ftp)://[a-z0-9\\-.]+\\.[a-z]{2,3}(\\.?[a-z0-9\\-_?,'/\\\\+&%$#=~])*":self.url,
                        " :End of /MOTD command\\.":self.join,
                        "^ERROR :Closing Link: ":self.stop}
 
@@ -55,17 +61,16 @@ class Oracle:
             self.irc.connect((self.network, 6667)) # Should we let the user choose the port instead ?
             self.sendToServ("NICK %s"%self.name)
             self.sendToServ("USER %s %s_2 %s_3 :%s"%((self.name, )*4))
-            while(self.go):
+            while self.go:
                 data = re.split("\r|\n", self.irc.recv(4096))
                 for i in data:
-                    print i
                     for j in self.orders:
                         match =  re.search(j, i)
-                        if(match):
+                        if match:
                             self.orders[j](i, match.span())
                 time.sleep(freq)
-                self.irc.shutdown(socket.SHUT_RDWR)
-            self.conn.close()
+            self.irc.shutdown(socket.SHUT_RDWR)
+#            self.conn.close()
 
     def sendTo(self, target, message):
         """Sends a message to the choosen target"""
@@ -106,11 +111,16 @@ class Oracle:
     def bye(self, msg, match):
         """Quits current channel"""
         target = self.gettarget(msg)
-        if(target.lower() in map(lambda x:x.lower(), self.chan)):
+        if(target.lower() in map(str.lower, self.chan)):
             self.sendToServ("PART %s :All your link are belong to us."%target)
             self.chan.remove(target)
             if len(self.chan) == 0:
                 self.stop()
+
+    def url(self, msg, match):
+        """Detects and stores URLs"""
+        self.sendTo(self.gettarget(msg),
+                    msg[match[0]:match[1]])
 
     def help(self, msg, match):
         """Displays a minimal manual"""
