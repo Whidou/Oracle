@@ -3,45 +3,56 @@
 
 ###########################################################################
 # Oracle
-# Desc: Irc Bot allowing users to store URLs in a database and search for these URLs via keywords or authors. Based on a code by Whidou on irc.netrusk.net.
+# Desc: Irc Bot allowing users to store URLs in a database and search for
+# these URLs via keywords or authors.
+# Based on Maurice, by Whidou (http://whidou.free.fr/Maurice)
 # Date: 26/07/2011
 ###########################################################################
 
 
 
-#idées
-# lorsque un lien est posté, le bot stock et demande en query des mots cle
-# 
+# -- Idées --
+# - lorsque un lien est posté, le bot stock et demande en query des mots cle
+# - Ajouter une gestion des exceptions.
 
-import re, sys, socket, time, sqlite3
+VERSION = "0.0.5"
+
+import re, os, sys, socket, time, sqlite3
 
 
 
-class IrcBot:
+class Oracle:
+    """Oracle : """ # Please add the expanded acronym here
 
-    def __init__(self, network, chan, name="Oracle"):
-        self.network = network
-        self.chan = [chan]
-        self.name = name
+    def __init__(self, network, chan, name="Oracle", database=None):
+        self.network = str(network)
+        self.chan = [str(chan)]
+        self.name = str(name)
         self.configure()
         self.irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.stop()
         self.bits = {}
-        self.conn = sqlite3.connect(name+".sq3")
+        if not database:
+            database = os.path.join("~", # Not sure if this one will work on win$
+                                    ".Oracle",
+                                    "%s.sq3"%name)
+        self.conn = sqlite3.connect(str(database)) # What if the database doesn't exist yet ?
 
     def configure(self):
+        """Links commands to methods"""
         self.orders = {"^PING":self.pong,
                        "(?i) :!help$":self.help,
                        "(?i) :!version$":self.version,
+                       "(?i) :!quit$":self.bye,
                        "(?i) :!goto #[-_#a-zA-Z0-9]{1,49}$":self.goto,
                        " :End of /MOTD command\\.":self.join,
                        "^ERROR :Closing Link: ":self.stop}
 
     def mainloop(self, freq=1):
         """Serve forever"""
-        if(not self.go):
+        if not self.go:
             self.go = True
-            self.irc.connect((self.network, 6667))
+            self.irc.connect((self.network, 6667)) # Should we let the user choose the port instead ?
             self.sendToServ("NICK %s"%self.name)
             self.sendToServ("USER %s %s_2 %s_3 :%s"%((self.name, )*4))
             while(self.go):
@@ -54,6 +65,7 @@ class IrcBot:
                             self.orders[j](i, match.span())
                 time.sleep(freq)
                 self.irc.shutdown(socket.SHUT_RDWR)
+            self.conn.close()
 
     def sendTo(self, target, message):
         """Sends a message to the choosen target"""
@@ -66,45 +78,60 @@ class IrcBot:
         self.irc.send("%s\n"%str(line))
 
     def stop(self, *args):
-        """Stop """
+        """Stops the main loop"""
         self.go = False
-
-    # Tech Stuff:
         
     def pong(self, msg, match):
+        """Keeps the link alive"""
         self.sendToServ("PONG %s"%(msg.split()[1]))
 
     def join(self, msg, match):
+        """Joins a new channel on startup"""
         self.sendToServ("JOIN %s"%self.chan[0])
 
     def gettarget(self, msg):
+        """Obtains sender's name from message"""
         to = msg[msg.find("PRIVMSG ")+8:msg.find(" :")]
         if(to.lower() == self.name.lower()):
             return msg[1:msg.find("!")]
         return to     
 
-
     def goto(self, msg, match):
+        """Joins another channel"""
         target = msg.split()[-1]
-        if(target.lower() not in map(lambda x:x.lower(), self.chan)):
+        if(target.lower() not in map(str.lower, self.chan)):
             self.chan.append(target)
             self.sendToServ("JOIN %s"%target)
 
     def bye(self, msg, match):
+        """Quits current channel"""
         target = self.gettarget(msg)
         if(target.lower() in map(lambda x:x.lower(), self.chan)):
-            self.sendToServ("PART %s :ICI UN MESSAGE DE QUIT"%target)
+            self.sendToServ("PART %s :All your link are belong to us."%target)
             self.chan.remove(target)
             if len(self.chan) == 0:
                 self.stop()
 
     def help(self, msg, match):
-	    self.sendTo(self.gettarget(msg),"""A venir""")
+        """Displays a minimal manual"""
+        self.sendTo(self.gettarget(msg),"""!help : Displays this message.
+!version : Displays Oracle's version.
+!goto #foo : Goes to #foo.
+!bye : Leaves current channel.""")
         
     def version(self, msg, match):
-	    self.sendTo(self.gettarget(msg),"""A venir""")
+        """Displays version data"""
+        self.sendTo(self.gettarget(msg),"""Oracle
+v%s
+Non-functional beta version.
+http://hgpub.druil.net/Oracle/"""%VERSION)
 
-# Main :
+
 
 if __name__ == "__main__":
-    IrcBot(sys.argv[1], sys.argv[2], sys.argv[3]).mainloop()
+    database = None
+    if len(sys.argv) == 5:      # It's up to the user to choose the default
+        database = sys.argv[4]  # database in ~/.Oracle or another one.
+    Oracle(sys.argv[1], sys.argv[2], sys.argv[3], database).mainloop()
+# Usage: oracle SERVER CHANNEL BOTNAME [DATABASE]
+# If no database is specified, ~/.Oracle/BOTNAME.sq3 will be used
