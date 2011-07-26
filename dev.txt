@@ -7,4 +7,4 @@ chan_orig TEXT,
 auteur TEXT,
 link TEXT,
 keywords TEXT,
-date TEXT)"
+date INTEGER)"

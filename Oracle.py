@@ -15,7 +15,7 @@
 #   - Ajouter une gestion des exceptions.
 
 
-VERSION = "0.0.11"
+VERSION = "0.1.0"
 
 import re, os, sys, socket, time, sqlite3
 
@@ -43,7 +43,7 @@ chan_orig TEXT,\
 auteur TEXT,\
 link TEXT,\
 keywords TEXT,\
-date TEXT);'|sqlite %s"%(self.name, database)) # Unix only
+date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
         self.conn = sqlite3.connect(str(database))
         self.db = self.conn.cursor()
 
@@ -124,7 +124,14 @@ date TEXT);'|sqlite %s"%(self.name, database)) # Unix only
 
     def url(self, msg, match):
         """Detects and stores URLs"""
-        self.sendTo(self.gettarget(msg),
+        chan = self.gettarget(msg)
+        self.db.execute("INSERT INTO %s VALUES (NULL,'%s','%s', '%s', '', %i);"%(self.name,
+                                                                             chan,
+                                                                             msg[1:msg.find("!")],
+                                                                             msg[match[0]:match[1]],
+                                                                             int(time.time())))
+        self.conn.commit()
+        self.sendTo(chan,
                     msg[match[0]:match[1]])
 
     def help(self, msg, match):
