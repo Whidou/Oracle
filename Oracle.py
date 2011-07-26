@@ -15,7 +15,7 @@
 #   - Ajouter une gestion des exceptions.
 
 
-VERSION = "0.0.8"
+VERSION = "0.0.9"
 
 import re, os, sys, socket, time, sqlite3
 
@@ -49,7 +49,7 @@ class Oracle:
                        "(?i) :!version$":self.version,
                        "(?i) :!quit$":self.bye,
                        "(?i) :!goto #[-_#a-zA-Z0-9]{1,49}$":self.goto,
-                       "(?i)(https?|ftp)://[a-z0-9\\-.]+\\.[a-z]{2,3}([.,;:]*[a-z0-9\\-_?'/\\\\+&%$#=~])*":self.url,
+                       "(?i)(https?|ftp)://[a-z0-9\\-.@:]+\\.[a-z]{2,3}([.,;:]*[a-z0-9\\-_?'/\\\\+&%$#=~])*":self.url,
                        " :End of /MOTD command\\.":self.join,
                        "^ERROR :Closing Link: ":self.stop}
 
