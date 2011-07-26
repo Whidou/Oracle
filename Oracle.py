@@ -1,4 +1,4 @@
-#!/usr/bin/python
+ï»¿#!/usr/bin/python
 # -*- Coding: Utf-8 -*-
 
 ###########################################################################
@@ -9,8 +9,8 @@
 
 
 
-#idées
-# lorsque un lien est posté, le bot stock et demande en query des mots cle
+#idÃ©es
+# lorsque un lien est postÃ©, le bot stock et demande en query des mots cle
 # 
 
 import random, re, sys, socket, time, sqlite3
@@ -19,7 +19,7 @@ import random, re, sys, socket, time, sqlite3
 
 class IrcBot:
 
-    def __init__(self, network="irc.netrusk.net", chan, name="Oracle"):
+    def __init__(self, network, chan, name="Oracle"):
         self.network = network
         self.chan = [chan]
         self.name = name
@@ -27,7 +27,7 @@ class IrcBot:
         self.irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.stop()
         self.bits = {}
-	self.conn=sqlite3.connect(name+".sq3")
+        self.conn = sqlite3.connect(name+".sq3")
 
     def configure(self):
         self.orders = {"^PING":self.pong,
