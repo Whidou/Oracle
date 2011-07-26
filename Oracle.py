@@ -127,7 +127,7 @@ class Oracle:
         self.sendTo(self.gettarget(msg),"""!help : Displays this message.
 !version : Displays Oracle's version.
 !goto #foo : Goes to #foo.
-!bye : Leaves current channel.""")
+!quit : Leaves current channel.""")
         
     def version(self, msg, match):
         """Displays version data"""
