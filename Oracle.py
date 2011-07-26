@@ -13,7 +13,7 @@
 # lorsque un lien est posté, le bot stock et demande en query des mots cle
 # 
 
-import random, re, sys, socket, time, sqlite3
+import re, sys, socket, time, sqlite3
 
 
 
