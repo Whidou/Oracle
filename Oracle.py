@@ -15,14 +15,14 @@
 #   - Ajouter une gestion des exceptions.
 
 
-VERSION = "0.1.3"
+VERSION = "0.1.5"
 
 import re, os, sys, socket, time, sqlite3
 
 
 
 class Oracle:
-    """Oracle : """ # Please add the expanded acronym here
+    """Oracle : Oracle Recherche, Accepte et Consulte les Liens Etonnants""" # Please add the expanded acronym here
 
     def __init__(self, network, chan, name="Oracle", database=None):
         self.network = str(network)
@@ -167,11 +167,26 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
 
     def tag(self, msg, match):
         """Adds tag(s) to last URL"""
+        
         pass
 
     def search(self, msg, match):
         """Searches for an URL with the given tags"""
         pass
+
+    def deleteurl(self, msg, match):
+        """Deletes a previously added url"""
+        #deux formes: !delurl last    !delurl [URL]
+        chan=self.gettarget(msg)
+        #faire une regex pour la reconnaissance du last ou url. Le souci étant que last est un mot assez courant.
+        if "!delete last" in msg:
+            db.execute("DELETE FROM %s WHERE id=%s"%(self.name,self.lasturl[self.chan.index(chan)]))
+        else: #si c'est une url qui est fournie
+            url=re.search("(?i)(https?|ftp)://[a-z0-9\\-.@:]+\\.[a-z]{2,3}([.,;:]*[a-z0-9\\-_?'/\\\\+&%$#=~])*",msg)
+            db.execute("DELETE FROM %S WHERE link='%s'"%(self.name,url))
+
+        conn.commit()
+        self.sendTo(chan,"Suppression effectuée")
 
     def help(self, msg, match):
         """Displays a minimal manual"""
