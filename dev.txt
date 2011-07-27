@@ -1,31 +1,10 @@
 Ce fichier servira d'échange asynchrone pour tous les dev travaillants sur ce projet:
 
-Voici une requete SQL qui me permettait de créer la bdd sur l'ancien prog:
-"CREATE TABLE oracle(
-id INTEGER PRIMARY KEY,
-chan_orig TEXT,
-auteur TEXT,
-link TEXT,
-keywords TEXT,
-date INTEGER)"
-
-Suppression:
-!delurl last
-!delurl [URL]
-
-Ajout de tags à la dernière URL citée :
-+tag
-+tag1 +tag2
-
 Recherche simple :
 !search tag
 !search tag1 tag2
 
 Ajouter une recherche par date et par personne.
-
-Ajouter une gestion de la dernière URL/chan:
-	-création d'une liste qui serait en corrélation avec self.chan ? Travailler là-dessus.
-		- autant faire un dico chan:ref_url
 
 POYO insiste pour laisser au posteur du lien seul la possibilité d'ajouter des tags.
 	- le posteur du lien aura pas forcément envie de tagger, mieux vaut faire confiance à l'ensemble des présents.
@@ -36,5 +15,3 @@ POYO souhaite pouvoir créer une interface web communiquant avec la bdd. Possibil
 Faire un fichier de config? (module configparser relativement adapté) Attention à l'effet 'usine à gaz'
 
 Faut-il gérer les doublons comme "http://google.com/", "http://www.google.com/", "http://google.com" par exemple ? Pour l'instant, Oracle considère ces trois URL comme différentes.
-
-Pourquoi avoir mis BOTNAME entre crochets dans l'usage alors qu'il s'agit d'un argument obligatoire au vu du code ?

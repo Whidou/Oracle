@@ -15,7 +15,7 @@
 #   - Ajouter une gestion des exceptions.
 
 
-VERSION = "0.1.6"
+VERSION = "0.2.0"
 
 import re, os, sys, socket, time, sqlite3
 
@@ -49,11 +49,11 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
 
     def configure(self):
         """Links commands to methods"""
-        self.orders = {"^PING":self.pong,               # ^ indique un début de ligne
-                       "(?i) :!help$":self.help,        # (?i) précise que la casse est ignorée
-                       "(?i) :!version$":self.version,  # $ indique une fin de ligne
-                       "(?i) :!quit$":self.bye,                         # Le nom d'un chan est composé de 1 à 49 caractères
-                       "(?i) :!goto #[-_#a-z0-9]{1,49}$":self.goto,     # lettres, nombres, -, _, et #
+        self.orders = {"^PING":self.pong,                                       # ^ indique un début de ligne
+                       "(?i)PRIVMSG .*? :!help$":self.help,                     # (?i) précise que la casse est ignorée
+                       "(?i)PRIVMSG .*? :!version$":self.version,               # $ indique une fin de ligne
+                       "(?i)PRIVMSG .*? :!quit$":self.bye,                      # Le nom d'un chan est composé de 1 à 49 caractères
+                       "(?i)PRIVMSG .*? :!goto #[-_#a-z0-9]{1,49}$":self.goto,  # lettres, nombres, -, _, et #
                        "(?i)(https?|ftp)://[a-z0-9\\-.@:]+\\.[a-z]{2,3}([.,;:]*[a-z0-9\\-_?'/\\\\+&%$#=~])*":self.url,
                            # "(https?|ftp)://" : http://, https:// ou ftp://
                            # "[a-z0-9\-.@:]+" : Domaine de x-ième niveau (google, www.perdu, hgpub.druil)
@@ -62,13 +62,13 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
                            #                                        Ne peut se terminer par ., ,, ; ou :
                            #                                        Afin d'éviter de prendre la ponctuation
                            #                                        Du message dans l'URL
-                       "(?i) :!delete (last|((https?|ftp)://[a-z0-9\\-.@:]+\\.[a-z]{2,3}([.,;:]*[a-z0-9\\-_?'/\\\\+&%$#=~])*)":self.deleteurl,
-                       "(?i) :(\\+[a-z0-9]+ ?)+$":self.tag,
+                       "(?i)PRIVMSG .*? :!delete ":self.delete,
+                       "(?i)PRIVMSG .*? :(\\+[a-z0-9]+ ?)+$":self.tag,
                            # "\+[a-z0-9]+" Un + suivi d'au moins 1 caractère alphnumérique
                            # " ?" Suivi d'un espace ou pas
                            # "+" Le tout répété au moins une fois
                            #    "+tag01", "+234 +tag2" et "+tag1+tag2" sont donc des expressions valides
-                       "(?i) :!search( [a-z0-9]+)+$":self.search,
+                       "(?i)PRIVMSG .*? :!search( [a-z0-9]+)+$":self.search,
                            # " [a-z0-9]+" Un espace suivi d'au moins un caractère alphanumérique
                            # "+" Répété au moins une fois
                        " :End of /MOTD command\\.":self.join,
@@ -148,54 +148,53 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
     def url(self, msg, match):
         """Detects and stores URLs"""
         chan = self.gettarget(msg)
-        if chan.lower() in map(str.lower, self.chan): # Ne réponds pas aux messages privés
+        if (msg.find("PRIVMSG %s :!"%chan) == -1) and (chan.lower() in map(str.lower, self.chan)): # Ne réponds pas aux messages privés ni aux commandes comme !delete
             url = msg[match[0]:match[1]]
             # Ajout d'une méthode de vérification de la présence des liens dans la base.
-            self.db.execute("SELECT * FROM %s WHERE link='%s'"%(self.name,  # Nom du bot/de la table
-                                                                url))       # URL
-            if self.db.fetchall() == []:
+            self.db.execute("SELECT link, keywords FROM %s WHERE link='%s'"%(self.name, # Nom du bot/de la table
+                                                                url))                   # URL
+            fetch = self.db.fetchall()
+            if fetch == []:
                 self.db.execute("INSERT INTO %s VALUES (NULL,'%s','%s', '%s', '', %i);"%(self.name,                 # Nom du bot/de la table
                                                                                          chan,                      # Chan
                                                                                          msg[1:msg.find("!")],      # Pseudo du posteur
                                                                                          url,                       # URL
                                                                                          int(time.time())))         # Timestamp
                 self.conn.commit()
-                self.db.execute("SELECT id FROM %s ORDER BY id DESC"%(self.botname))
-                self.lasturl[chan]=self.db.fetchall()[0][0]
             else:
                 #Ligne envoyée au chan si le lien est déjà présent.
-                self.sendTo(chan,"'%s' est déjà présente avec '%s' comme mots-clefs"%(url,                          # URL
-                                                                                      self.db.fetchall()[0][4]))    # Tags
-
-            self.lasturl[chan]=self.db.fetchall()[0][0] #stock l'id de l'url dans la "case" correspondant au chan
+                self.sendTo(chan,"%s est déjà présent avec %r comme mots-clefs"%(url,                # URL
+                                                                                 fetch[0][1][1:]))   # Tags
+            self.lasturl[chan] = url # Stockage de l'url dans la "case" correspondant au chan
 
     def tag(self, msg, match):
         """Adds tag(s) to last URL"""
         chan = self.gettarget(msg)
-        tags=re.findall("(i?) \+[a-z0-9]*\ ?")
-        self.db.execute("SELECT keywords FROM %s WHERE id=%s"%(self.name,self.lasturl[chan]))
-        chainedtags=self.db.fetchall()[0][0]
-        for tag in tags:
-            if tag[len(tag)-1]==' ':
-                tag=tag[0:-1]
-            chainedtags+=","+tag[1:] #on vire le '+'
-        self.db.execute("UPDATE %s SET keywords='%s' WHERE id=%s"%(self.name,chainedtags,self.lasturl[chan]))
+        self.db.execute("SELECT keywords FROM %s WHERE link='%s'"%(self.name,
+                                                                 self.lasturl[chan]))
+        self.db.execute("UPDATE %s SET keywords='%s' WHERE link='%s'"%(self.name,
+                                                                     "%s,%s,"%(self.db.fetchall()[0][0],
+                                                                               ','.join(re.findall("[a-z0-9]+",
+                                                                                                   msg[msg.find(" :"):]))),
+                                                                     self.lasturl[chan]))
         self.conn.commit()
 
     def search(self, msg, match):
         """Searches for an URL with the given tags"""
         pass
 
-    def deleteurl(self, msg, match):
+    def delete(self, msg, match):
         """Deletes a previously added url"""
-        #deux formes: !delurl last    !delurl [URL]
+        # Deux formes: "!delete last" et "!delete [URL]"
         chan=self.gettarget(msg)
         if "!delete last" in msg:
-            db.execute("DELETE FROM %s WHERE id=%s"%(self.name,self.lasturl[self.chan.index(chan)]))
-        else: #si c'est une url qui est fournie
-            db.execute("DELETE FROM %S WHERE link='%s'"%(self.name,msg[match[0]+8:match[1]]))
-        conn.commit()
-        self.sendTo(chan,"Suppression effectuée")
+            url = self.lasturl[chan]
+        else:                           # Si une URL est fournie
+            url = msg[msg.find("!delete ")+8:]
+        self.db.execute("DELETE FROM %s WHERE link='%s'"%(self.name,
+                                                          url))
+        self.conn.commit()
+        self.sendTo(chan,"Suppression effectuée.")
 
     def help(self, msg, match):
         """Displays a minimal manual"""
