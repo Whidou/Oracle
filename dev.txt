@@ -9,6 +9,10 @@ link TEXT,
 keywords TEXT,
 date INTEGER)"
 
+Suppression:
+!delurl last
+!delurl [URL]
+
 Ajout de tags à la dernière URL citée :
 +tag
 +tag1 +tag2
@@ -21,3 +25,7 @@ Ajouter une recherche par date et par personne.
 
 Ajouter une gestion de la dernière URL/chan:
 -création d'une liste qui serait en corrélation avec self.chan ? Travailler là-dessus.
+
+POYO insiste pour laisser au posteur du lien seul la possibilité d'ajouter des tags.
+POYO souhaite pouvoir créer une interface web communiquant avec la bdd. Possibilitée de choisir sqlite/mysql?
+Faire un fichier de config? (module configparser relativement adapté) Attention à l'effet 'usine à gaz'
