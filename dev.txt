@@ -24,8 +24,17 @@ Recherche simple :
 Ajouter une recherche par date et par personne.
 
 Ajouter une gestion de la dernière URL/chan:
--création d'une liste qui serait en corrélation avec self.chan ? Travailler là-dessus.
+	-création d'une liste qui serait en corrélation avec self.chan ? Travailler là-dessus.
+		- autant faire un dico chan:ref_url
 
 POYO insiste pour laisser au posteur du lien seul la possibilité d'ajouter des tags.
+	- le posteur du lien aura pas forcément envie de tagger, mieux vaut faire confiance à l'ensemble des présents.
+
 POYO souhaite pouvoir créer une interface web communiquant avec la bdd. Possibilitée de choisir sqlite/mysql?
+	- Oui, c'est faisable assez simplement. Il faudra juste penser à lancer Oracle depuis Druil.
+
 Faire un fichier de config? (module configparser relativement adapté) Attention à l'effet 'usine à gaz'
+
+Faut-il gérer les doublons comme "http://google.com/", "http://www.google.com/", "http://google.com" par exemple ? Pour l'instant, Oracle considère ces trois URL comme différentes.
+
+Pourquoi avoir mis BOTNAME entre crochets dans l'usage alors qu'il s'agit d'un argument obligatoire au vu du code ?
