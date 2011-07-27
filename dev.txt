@@ -18,3 +18,6 @@ Recherche simple :
 !search tag1 tag2
 
 Ajouter une recherche par date et par personne.
+
+Ajouter une gestion de la dernière URL/chan:
+-création d'une liste qui serait en corrélation avec self.chan ? Travailler là-dessus.

@@ -15,7 +15,7 @@
 #   - Ajouter une gestion des exceptions.
 
 
-VERSION = "0.1.1"
+VERSION = "0.1.2"
 
 import re, os, sys, socket, time, sqlite3
 
@@ -32,6 +32,7 @@ class Oracle:
         self.irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.stop()
         self.bits = {}
+        self.lasturl=[] #id de la derniere url postée sur un chan pour chaque self.chan[]
         if not database:
             oraclePath = os.path.join(os.path.expanduser("~"), ".Oracle")
             if not os.path.exists(oraclePath):
@@ -113,6 +114,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
         target = msg.split()[-1]
         if(target.lower() not in map(str.lower, self.chan)):
             self.chan.append(target)
+            self.lasturl.append(0)
             self.sendToServ("JOIN %s"%target)
 
     def bye(self, msg, match):
@@ -129,12 +131,19 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
     def url(self, msg, match):
         """Detects and stores URLs"""
         chan = self.gettarget(msg)
-        self.db.execute("INSERT INTO %s VALUES (NULL,'%s','%s', '%s', '', %i);"%(self.name,
-                                                                                 chan,
-                                                                                 msg[1:msg.find("!")],
-                                                                                 msg[match[0]:match[1]],
-                                                                                 int(time.time())))
-        self.conn.commit()
+        # Ajout d'une méthode de vérification de la présence des liens dans la base.
+        self.db.execute("SELECT * FROM %s WHERE link='%s'"%(self.name, msg[1:msg.find("!")])) #J'ai remis ici ton expression de plus bas supposant qu'il s'agissaait de l'url pure
+        if(self.db.fetchall() == []):
+            self.db.execute("INSERT INTO %s VALUES (NULL,'%s','%s', '%s', '', %i);"%(self.name,
+                                                                                     chan,
+                                                                                     msg[1:msg.find("!")], # Whidou: Commente un peu ces lignes
+                                                                                     msg[match[0]:match[1]],
+                                                                                     int(time.time())))
+            self.conn.commit()
+        else:
+            self.sendTo(chan,"'%s' déjà présent avec '%s' comme mots-clefs"%(msg[1:msg.find("!")],self.db.fetchall()[0][4])) #Ligne envoyée au chan si le lien est déjà présent.
+
+        self.lasturl[self.chan.index(chan)]=self.db.fetchall()[0][0] #stock l'id de l'url dans la case correspondant a l'id du chan
 
     def tag(self, msg, match):
         """Adds tag(s) to last URL"""
@@ -165,5 +174,5 @@ if __name__ == "__main__":
     if len(sys.argv) == 5:      # It's up to the user to choose the default
         database = sys.argv[4]  # database in ~/.Oracle or another one.
     Oracle(sys.argv[1], sys.argv[2], sys.argv[3], database).mainloop()
-# Usage: oracle SERVER CHANNEL BOTNAME [DATABASE]
+# Usage: oracle SERVER CHANNEL [BOTNAME] [DATABASE]
 # If no database is specified, ~/.Oracle/Oracle.sq3 will be used
