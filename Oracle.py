@@ -49,15 +49,32 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
 
     def configure(self):
         """Links commands to methods"""
-        self.orders = {"^PING":self.pong,
-                       "(?i) :!help$":self.help,
-                       "(?i) :!version$":self.version,
-                       "(?i) :!quit$":self.bye,
-                       "(?i) :!goto #[-_#a-zA-Z0-9]{1,49}$":self.goto,
+        self.orders = {"^PING":self.pong,               # ^ indique un début de ligne
+                       "(?i) :!help$":self.help,        # (?i) précise que la casse est ignorée
+                       "(?i) :!version$":self.version,  # $ indique une fin de ligne
+                       "(?i) :!quit$":self.bye,                         # Le nom d'un chan est composé de 1 à 49 caractères
+                       "(?i) :!goto #[-_#a-z0-9]{1,49}$":self.goto,     # lettres, nombres, -, _, et #
                        "(?i)(https?|ftp)://[a-z0-9\\-.@:]+\\.[a-z]{2,3}([.,;:]*[a-z0-9\\-_?'/\\\\+&%$#=~])*":self.url,
-                       "(?i) :(\+[a-z0-9]+ ?)+$":self.tag,
+                           # "(https?|ftp)://" : http://, https:// ou ftp://
+                           # "[a-z0-9\-.@:]+" : Domaine de x-ième niveau (google, www.perdu, hgpub.druil)
+                           # "\.[a-z]{2,3}" : Domaine de premier niveau (.com, .fr, .org, etc...)
+                           # "([.,;:]*[a-z0-9\\-_?'/\\\\+&%$#=~])*" Bordel de fin d'adresse
+                           #                                        Ne peut se terminer par ., ,, ; ou :
+                           #                                        Afin d'éviter de prendre la ponctuation
+                           #                                        Du message dans l'URL
+                       "(?i) :(\\+[a-z0-9]+ ?)+$":self.tag,
+                           # "\+[a-z0-9]+" Un + suivi d'au moins 1 caractère alphnumérique
+                           # " ?" Suivi d'un espace ou pas
+                           # "+" Le tout répété au moins une fois
+                           #    "+tag01", "+234 +tag2" et "+tag1+tag2" sont donc des expressions valides
                        "(?i) :!search( [a-z0-9]+)+$":self.search,
+                           # " [a-z0-9]+" Un espace suivi d'au moins un caractère alphanumérique
+                           # "+" Répété au moins une fois
                        " :End of /MOTD command\\.":self.join,
+                           # Il ne faut pas oublier que \\ dans un string python équivaut à \ dans la regex
+                           # Un antislash littéral se note donc \\\\, ce qui est chiant
+                           # Le problème aurait pu être contourné avec des strings unicode
+                           # Mais bon, moi je trouve pas ça franchement gênant
                        "^ERROR :Closing Link: ":self.stop}
 
     def mainloop(self, freq=1):
@@ -68,12 +85,12 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
             self.sendToServ("NICK %s"%self.name)
             self.sendToServ("USER %s %s_2 %s_3 :%s"%((self.name, )*4))
             while self.go:
-                data = re.split("\r|\n", self.irc.recv(4096))
-                for i in data:
-                    for j in self.orders:
-                        match =  re.search(j, i)
-                        if match:
-                            self.orders[j](i, match.span())
+                data = re.split("\r|\n", self.irc.recv(4096))   # Réception des données
+                for i in data:                                  # Pour chaque ligne reçue
+                    for j in self.orders:                       # On passe en revue chaque regex
+                        match =  re.search(j, i)                # Et on la recherche dans la ligne
+                        if match:                               # Si l'une d'elles correspond
+                            self.orders[j](i, match.span())     # On exécute la méthode associée
                 time.sleep(freq)
             self.irc.shutdown(socket.SHUT_RDWR)
             self.db.close()
