@@ -15,7 +15,7 @@
 #   - Ajouter une gestion des exceptions.
 
 
-VERSION = "0.1.5"
+VERSION = "0.1.6"
 
 import re, os, sys, socket, time, sqlite3
 
@@ -62,6 +62,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
                            #                                        Ne peut se terminer par ., ,, ; ou :
                            #                                        Afin d'éviter de prendre la ponctuation
                            #                                        Du message dans l'URL
+                       "(?i) :!delete (last|((https?|ftp)://[a-z0-9\\-.@:]+\\.[a-z]{2,3}([.,;:]*[a-z0-9\\-_?'/\\\\+&%$#=~])*)":self.deleteurl,
                        "(?i) :(\\+[a-z0-9]+ ?)+$":self.tag,
                            # "\+[a-z0-9]+" Un + suivi d'au moins 1 caractère alphnumérique
                            # " ?" Suivi d'un espace ou pas
@@ -137,6 +138,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
         target = self.gettarget(msg)
         if target.lower() in map(str.lower, self.chan):
             self.sendToServ("PART %s :All your link are belong to us."%target)
+            del self.lasturl[target]
             self.chan.remove(target)
             if len(self.chan) == 0:
                 self.stop()
@@ -158,6 +160,8 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
                                                                                          url,                       # URL
                                                                                          int(time.time())))         # Timestamp
                 self.conn.commit()
+                self.db.execute("SELECT id FROM %s ORDER BY id DESC"%(self.botname))
+                self.lasturl[chan]=self.db.fetchall()[0][0]
             else:
                 #Ligne envoyée au chan si le lien est déjà présent.
                 self.sendTo(chan,"'%s' est déjà présente avec '%s' comme mots-clefs"%(url,                          # URL
@@ -167,8 +171,16 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
 
     def tag(self, msg, match):
         """Adds tag(s) to last URL"""
-        
-        pass
+        chan = self.gettarget(msg)
+        tags=re.findall("(i?) \+[a-z0-9]*\ ?")
+        self.db.execute("SELECT keywords FROM %s WHERE id=%s"%(self.name,self.lasturl[chan]))
+        chainedtags=self.db.fetchall()[0][0]
+        for tag in tags:
+            if tag[len(tag)-1]==' ':
+                tag=tag[0:-1]
+            chainedtags+=","+tag[1:] #on vire le '+'
+        self.db.execute("UPDATE %s SET keywords='%s' WHERE id=%s"%(self.name,chainedtags,self.lasturl[chan]))
+        self.conn.commit()
 
     def search(self, msg, match):
         """Searches for an URL with the given tags"""
@@ -178,13 +190,10 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
         """Deletes a previously added url"""
         #deux formes: !delurl last    !delurl [URL]
         chan=self.gettarget(msg)
-        #faire une regex pour la reconnaissance du last ou url. Le souci étant que last est un mot assez courant.
         if "!delete last" in msg:
             db.execute("DELETE FROM %s WHERE id=%s"%(self.name,self.lasturl[self.chan.index(chan)]))
         else: #si c'est une url qui est fournie
-            url=msg[match[0]+8:match[1]]
-            db.execute("DELETE FROM %S WHERE link='%s'"%(self.name,url))
-
+            db.execute("DELETE FROM %S WHERE link='%s'"%(self.name,msg[match[0]+8:match[1]]))
         conn.commit()
         self.sendTo(chan,"Suppression effectuée")
 
