@@ -182,7 +182,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
         if "!delete last" in msg:
             db.execute("DELETE FROM %s WHERE id=%s"%(self.name,self.lasturl[self.chan.index(chan)]))
         else: #si c'est une url qui est fournie
-            url=re.search("(?i)(https?|ftp)://[a-z0-9\\-.@:]+\\.[a-z]{2,3}([.,;:]*[a-z0-9\\-_?'/\\\\+&%$#=~])*",msg)
+            url=msg[match[0]+8:match[1]]
             db.execute("DELETE FROM %S WHERE link='%s'"%(self.name,url))
 
         conn.commit()
