@@ -15,7 +15,7 @@
 #   - Ajouter une gestion des exceptions.
 
 
-VERSION = "0.2.0"
+VERSION = "0.2.1"
 
 import re, os, sys, socket, time, sqlite3
 
@@ -31,7 +31,7 @@ class Oracle:
         self.configure()
         self.irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.stop()
-        self.lasturl={} #id de la derniere url postée sur un chan pour chaque self.chan[]
+        self.lasturl={str(chan):"http://hgpub.druil.net/Oracle/"} #id de la derniere url postée sur un chan pour chaque self.chan[]
         if not database:
             oraclePath = os.path.join(os.path.expanduser("~"), ".Oracle")
             if not os.path.exists(oraclePath):
@@ -132,6 +132,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
         if target.lower() not in map(str.lower, self.chan):
             self.chan.append(target)
             self.sendToServ("JOIN %s"%target)
+            self.lasturl[target] = "http://hgpub.druil.net/Oracle/"
 
     def bye(self, msg, match):
         """Quits current channel"""
@@ -169,9 +170,10 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
 
     def tag(self, msg, match):
         """Adds tag(s) to last URL"""
+        print self.lasturl
         chan = self.gettarget(msg)
         self.db.execute("SELECT keywords FROM %s WHERE link='%s'"%(self.name,
-                                                                 self.lasturl[chan]))
+                                                                   self.lasturl[chan]))
         self.db.execute("UPDATE %s SET keywords='%s' WHERE link='%s'"%(self.name,
                                                                      "%s,%s,"%(self.db.fetchall()[0][0],
                                                                                ','.join(re.findall("[a-z0-9]+",
@@ -186,7 +188,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
     def delete(self, msg, match):
         """Deletes a previously added url"""
         # Deux formes: "!delete last" et "!delete [URL]"
-        chan=self.gettarget(msg)
+        chan = self.gettarget(msg)
         if "!delete last" in msg:
             url = self.lasturl[chan]
         else:                           # Si une URL est fournie
@@ -194,6 +196,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
         self.db.execute("DELETE FROM %s WHERE link='%s'"%(self.name,
                                                           url))
         self.conn.commit()
+        self.lasturl[chan] = "http://hgpub.druil.net/Oracle/"
         self.sendTo(chan,"Suppression effectuée.")
 
     def help(self, msg, match):
