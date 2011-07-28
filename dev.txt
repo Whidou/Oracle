@@ -4,14 +4,28 @@ Recherche simple :
 !search tag
 !search tag1 tag2
 
+Si un tag correspond à un auteur, il faut le chercher. Penser à faire une recherche sur le pseudo +éventuellement des tag (comme [boulot])
+
+
+On a un souci avec le système actuel. en effet, les tags sont stockés ainsi:
+',tagdetest1,tagdetest2,,tagdetest3,'
+=>anarchique, on va avoir du souci lors de la récup des tags pour la recherche
+
+de plus, un ajout de tag +Oracle a donné: ',racle,'
+il faut changer le système de stockage pour avoir uniquement du csv de base (tag1,tag2).
+Vérifier la regex qui doit accepter les majuscules.(fait)
+
 Ajouter une recherche par date et par personne.
 
 POYO insiste pour laisser au posteur du lien seul la possibilité d'ajouter des tags.
-	- le posteur du lien aura pas forcément envie de tagger, mieux vaut faire confiance à l'ensemble des présents.
+	- le posteur du lien aura pas forcément envie de tagger, mieux vaut faire confiance à l'ensemble des présents. => entièrement d'accord.
 
 POYO souhaite pouvoir créer une interface web communiquant avec la bdd. Possibilitée de choisir sqlite/mysql?
 	- Oui, c'est faisable assez simplement. Il faudra juste penser à lancer Oracle depuis Druil.
+	=> le souci étant là. Il n'a pas accès à Avitus (mon serveur)
 
 Faire un fichier de config? (module configparser relativement adapté) Attention à l'effet 'usine à gaz'
 
 Faut-il gérer les doublons comme "http://google.com/", "http://www.google.com/", "http://google.com" par exemple ? Pour l'instant, Oracle considère ces trois URL comme différentes.
+=> ça alourdirait pas mal le code, je pense
+

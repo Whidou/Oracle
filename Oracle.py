@@ -175,14 +175,15 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
         self.db.execute("SELECT keywords FROM %s WHERE link='%s'"%(self.name,
                                                                    self.lasturl[chan]))
         self.db.execute("UPDATE %s SET keywords='%s' WHERE link='%s'"%(self.name,
-                                                                     "%s,%s,"%(self.db.fetchall()[0][0],
-                                                                               ','.join(re.findall("[a-z0-9]+",
+                                                                     "%s%s,"%(self.db.fetchall()[0][0],
+                                                                               ','.join(re.findall("[a-zA-Z0-9]+",
                                                                                                    msg[msg.find(" :"):]))),
                                                                      self.lasturl[chan]))
         self.conn.commit()
 
     def search(self, msg, match):
         """Searches for an URL with the given tags"""
+        
         pass
 
     def delete(self, msg, match):
@@ -203,6 +204,9 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
         """Displays a minimal manual"""
         self.sendTo(self.gettarget(msg),"""!help : Displays this message.
 !version : Displays Oracle's version.
+!delete last: deletes last seen URL.
+!delete url: deletes the specified url.
++tag1 +tag2 : adds tag1 and tag2 the last seen links' tags.
 !goto #foo : Goes to #foo.
 !quit : Leaves current channel.""")
         
