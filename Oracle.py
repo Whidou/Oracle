@@ -13,6 +13,7 @@
 # -- Idées --
 #   - lorsque un lien est posté, le bot stock et demande en query des mots cle
 #   - Ajouter une gestion des exceptions.
+#   - !+tag1 tag2 tag3 au lieu de !+tag1 +tag2 +tag3 ?
 
 
 # TODO LIST
@@ -21,11 +22,11 @@
 # - Permettre la suppression de tags **
 
 # BUGS
-# - Lors de la suppression, n'importe quel mot clef après !delete est accepté, et affiche le message de suppression **
-# - Si un tag est ajouté/suppr alors que le dernier lien a été suppr, le bot plante ***
+# - Lors de la suppression, n'importe quel mot clef après !delete est accepté, et affiche le message de suppression [DONE]**
+# - Si un tag est ajouté/suppr alors que le dernier lien a été suppr, le bot plante [DONE] ***
 
 
-VERSION = "0.2.2"
+VERSION = "0.2.3"
 
 import re, os, sys, socket, time, sqlite3
 
@@ -73,12 +74,12 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
                            #                                        Afin d'éviter de prendre la ponctuation
                            #                                        Du message dans l'URL
                        "(?i)PRIVMSG .*? :!delete (last|(https?|ftp)://[a-z0-9\\-.@:]+\\.[a-z]{2,3}([.,;:]*[a-z0-9\\-_?'/\\\\+&%$#=~])*)":self.delete,
-                       "(?i)PRIVMSG .*? :(!\\+[a-z0-9]+ ?)+$":self.tagadd,
+                       "(?i)PRIVMSG .*? :!(\\+[a-z0-9]+ ?)+$":self.tagadd,
                            # "\+[a-z0-9]+" Un + suivi d'au moins 1 caractère alphnumérique
                            # " ?" Suivi d'un espace ou pas
                            # "+" Le tout répété au moins une fois
                            #    "+tag01", "+234 +tag2" et "+tag1+tag2" sont donc des expressions valides
-                       "(?i)PRIVMSG .*? :(!\\-[a-z0-9]+ ?)+$":self.tagdel,
+                       "(?i)PRIVMSG .*? :!(\\-[a-z0-9]+ ?)+$":self.tagdel,
                        "(?i)PRIVMSG .*? :!search( [a-z0-9]+)+$":self.search,
                            # " [a-z0-9]+" Un espace suivi d'au moins un caractère alphanumérique
                            # "+" Répété au moins une fois
@@ -183,18 +184,24 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
         """Adds tag(s) to last URL"""
         print self.lasturl
         chan = self.gettarget(msg)
-        self.db.execute("SELECT keywords FROM %s WHERE link='%s'"%(self.name,
-                                                                   self.lasturl[chan]))
-        self.db.execute("UPDATE %s SET keywords='%s' WHERE link='%s'"%(self.name,
-                                                                     "%s%s,"%(self.db.fetchall()[0][0],
-                                                                               ','.join(re.findall("[a-zA-Z0-9]+",
-                                                                                                   msg[msg.find(" :"):]))),
-                                                                     self.lasturl[chan]))
-        self.conn.commit()
+        if self.lasturl[chan]!="":
+            self.db.execute("SELECT keywords FROM %s WHERE link='%s'"%(self.name,
+                                                                       self.lasturl[chan]))
+            self.db.execute("UPDATE %s SET keywords='%s' WHERE link='%s'"%(self.name,
+                                                                         "%s%s,"%(self.db.fetchall()[0][0],
+                                                                                   ','.join(re.findall("[a-zA-Z0-9]+",
+                                                                                                       msg[msg.find(" :"):]))),
+                                                                         self.lasturl[chan]))
+            self.conn.commit()
+        else:
+            sendTo(chan,"Pas de lien auquel ajouter les tags.")
 
     def tagdel(self, msg, match):
         """deletes tag(s) to last URL"""
-        pass
+        if self.lasturl[chan]!="":
+            pass
+        else:
+            sendTo(chan,"Pas de lien auquel ajouter les tags.")
 
     def search(self, msg, match):
         """Searches for an URL with the given tags"""
@@ -222,7 +229,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
 !version : Displays Oracle's version.
 !delete last: deletes last seen URL.
 !delete url: deletes the specified url.
-+tag1 +tag2 : adds tag1 and tag2 the last seen links' tags.
+!+tag1 +tag2 : adds tag1 and tag2 the last seen links' tags.
 !goto #foo : Goes to #foo.
 !quit : Leaves current channel.""")
         
