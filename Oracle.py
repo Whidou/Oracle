@@ -15,7 +15,17 @@
 #   - Ajouter une gestion des exceptions.
 
 
-VERSION = "0.2.1"
+# TODO LIST
+# - Fonction !search ***
+# - Modifier la commande d'ajout de tag ***
+# - Permettre la suppression de tags **
+
+# BUGS
+# - Lors de la suppression, n'importe quel mot clef après !delete est accepté, et affiche le message de suppression **
+# - Si un tag est ajouté/suppr alors que le dernier lien a été suppr, le bot plante ***
+
+
+VERSION = "0.2.2"
 
 import re, os, sys, socket, time, sqlite3
 
@@ -31,7 +41,7 @@ class Oracle:
         self.configure()
         self.irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.stop()
-        self.lasturl={str(chan):"http://hgpub.druil.net/Oracle/"} #id de la derniere url postée sur un chan pour chaque self.chan[]
+        self.lasturl={str(chan):""} #id de la derniere url postée sur un chan pour chaque self.chan[]
         if not database:
             oraclePath = os.path.join(os.path.expanduser("~"), ".Oracle")
             if not os.path.exists(oraclePath):
@@ -62,12 +72,13 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
                            #                                        Ne peut se terminer par ., ,, ; ou :
                            #                                        Afin d'éviter de prendre la ponctuation
                            #                                        Du message dans l'URL
-                       "(?i)PRIVMSG .*? :!delete ":self.delete,
-                       "(?i)PRIVMSG .*? :(\\+[a-z0-9]+ ?)+$":self.tag,
+                       "(?i)PRIVMSG .*? :!delete (last|(https?|ftp)://[a-z0-9\\-.@:]+\\.[a-z]{2,3}([.,;:]*[a-z0-9\\-_?'/\\\\+&%$#=~])*)":self.delete,
+                       "(?i)PRIVMSG .*? :(!\\+[a-z0-9]+ ?)+$":self.tagadd,
                            # "\+[a-z0-9]+" Un + suivi d'au moins 1 caractère alphnumérique
                            # " ?" Suivi d'un espace ou pas
                            # "+" Le tout répété au moins une fois
                            #    "+tag01", "+234 +tag2" et "+tag1+tag2" sont donc des expressions valides
+                       "(?i)PRIVMSG .*? :(!\\-[a-z0-9]+ ?)+$":self.tagdel,
                        "(?i)PRIVMSG .*? :!search( [a-z0-9]+)+$":self.search,
                            # " [a-z0-9]+" Un espace suivi d'au moins un caractère alphanumérique
                            # "+" Répété au moins une fois
@@ -132,7 +143,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
         if target.lower() not in map(str.lower, self.chan):
             self.chan.append(target)
             self.sendToServ("JOIN %s"%target)
-            self.lasturl[target] = "http://hgpub.druil.net/Oracle/"
+            self.lasturl[target] = ""
 
     def bye(self, msg, match):
         """Quits current channel"""
@@ -164,11 +175,11 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
                 self.conn.commit()
             else:
                 #Ligne envoyée au chan si le lien est déjà présent.
-                self.sendTo(chan,"%s est déjà présent avec %r comme mots-clefs"%(url,                # URL
-                                                                                 fetch[0][1][1:]))   # Tags
+                self.sendTo(chan,"%s est déjà présent avec %s comme mots-clefs"%(url,                # URL
+                                                                                 fetch[0][1].strip()))   # Tags
             self.lasturl[chan] = url # Stockage de l'url dans la "case" correspondant au chan
 
-    def tag(self, msg, match):
+    def tagadd(self, msg, match):
         """Adds tag(s) to last URL"""
         print self.lasturl
         chan = self.gettarget(msg)
@@ -181,6 +192,10 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
                                                                      self.lasturl[chan]))
         self.conn.commit()
 
+    def tagdel(self, msg, match):
+        """deletes tag(s) to last URL"""
+        pass
+
     def search(self, msg, match):
         """Searches for an URL with the given tags"""
         
@@ -191,13 +206,14 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
         # Deux formes: "!delete last" et "!delete [URL]"
         chan = self.gettarget(msg)
         if "!delete last" in msg:
-            url = self.lasturl[chan]
+            if self.lasturl[chan]!="":
+                url = self.lasturl[chan]
         else:                           # Si une URL est fournie
             url = msg[msg.find("!delete ")+8:]
         self.db.execute("DELETE FROM %s WHERE link='%s'"%(self.name,
                                                           url))
         self.conn.commit()
-        self.lasturl[chan] = "http://hgpub.druil.net/Oracle/"
+        self.lasturl[chan] = ""
         self.sendTo(chan,"Suppression effectuée.")
 
     def help(self, msg, match):

@@ -29,3 +29,4 @@ Faire un fichier de config? (module configparser relativement adapté) Attention 
 Faut-il gérer les doublons comme "http://google.com/", "http://www.google.com/", "http://google.com" par exemple ? Pour l'instant, Oracle considère ces trois URL comme différentes.
 => ça alourdirait pas mal le code, je pense
 
+Corriger le bug de l'affiche de "Suppression effectuée" même lorsque le lien n'est pas valide.
