@@ -31,8 +31,8 @@ try
     $query = 'SELECT * FROM oracle ORDER BY id';
     // On récupère tout le contenu de la table  !
     $reponse = $bdd->query("SELECT * FROM '".$table."' ORDER BY id"); 								
-    ?>
-	<table>
+    
+	echo '<table>
    <caption>Index des liens</caption>
 
    <tr>
@@ -41,28 +41,25 @@ try
 	   <th>Lien</th>
        <th>Tags</th>
        <th>Heure</th>
-   </tr>
-    <?php 
+   </tr>';
 	// On affiche chaque entrée
     while ($donnees = $reponse->fetch())
     {
-    ?>
-       <tr> 
+   
+      echo  '<tr> 
      <th><?php echo $donnees['auteur']; ?></th>
      <th><?php echo $donnees['chan_orig']; ?> </th>
 	 <th><a href="<?php echo $donnees['link']; ?>"><?php echo $donnees['link']; ?></a></th>
 	 <th><?php echo $donnees['keywords']; ?></th>
 	 <th><?php echo date('d/m/Y H\hi', $donnees['date']); ?></th>
-	 </tr>
+	 </tr>';
 
 	 
-    <?php
-    }
-    ?>
+	}
+
 	
-	</table>
+	echo '</table>';
     
-	<?php
 	$reponse->closeCursor(); // Fin du traitement
 
 }
