@@ -15,7 +15,6 @@
 #   - Ajouter une gestion des exceptions.
 #   - !+tag1 tag2 tag3 au lieu de !+tag1 +tag2 +tag3 ?
 
-
 # TODO LIST
 # - Fonction !search ***
 # - Modifier la commande d'ajout de tag ***
@@ -24,7 +23,6 @@
 # BUGS
 # - Lors de la suppression, n'importe quel mot clef après !delete est accepté, et affiche le message de suppression [DONE]**
 # - Si un tag est ajouté/suppr alors que le dernier lien a été suppr, le bot plante [DONE] ***
-
 
 VERSION = "0.2.3"
 
