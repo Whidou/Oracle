@@ -29,7 +29,7 @@ try
     $pdo_options[PDO::ATTR_ERRMODE] = PDO::ERRMODE_EXCEPTION;    
     $bdd = new PDO("sqlite:".$base."");																
     $query = 'SELECT * FROM oracle ORDER BY id';
-    // On récupère tout le contenu de la table 
+    // On récupère tout le contenu de la table  !
     $reponse = $bdd->query("SELECT * FROM '".$table."' ORDER BY id"); 								
     ?>
 	<table>
