@@ -6,15 +6,6 @@ Recherche simple :
 
 Si un tag correspond à un auteur, il faut le chercher. Penser à faire une recherche sur le pseudo +éventuellement des tag (comme [boulot])
 
-
-On a un souci avec le système actuel. en effet, les tags sont stockés ainsi:
-',tagdetest1,tagdetest2,,tagdetest3,'
-=>anarchique, on va avoir du souci lors de la récup des tags pour la recherche
-
-de plus, un ajout de tag +Oracle a donné: ',racle,'
-il faut changer le système de stockage pour avoir uniquement du csv de base (tag1,tag2).
-Vérifier la regex qui doit accepter les majuscules.(fait)
-
 Ajouter une recherche par date et par personne.
 
 POYO insiste pour laisser au posteur du lien seul la possibilité d'ajouter des tags.
@@ -29,4 +20,10 @@ Faire un fichier de config? (module configparser relativement adapté) Attention 
 Faut-il gérer les doublons comme "http://google.com/", "http://www.google.com/", "http://google.com" par exemple ? Pour l'instant, Oracle considère ces trois URL comme différentes.
 => ça alourdirait pas mal le code, je pense
 
-Corriger le bug de l'affiche de "Suppression effectuée" même lorsque le lien n'est pas valide.
+ALtay propose la possibilité de mute.
+POYO + Altay proposent de faire passer ce message en PV
+
+Mais au fond, est-ce que le plus simple ne serait pas de faire [URL] [mots clefs séparés par une virgule] ?
+La suppression serait gerée via l'ajout toujours de - devant le tag à supprimer.
+
+Je voulais faire ce système de +tag -tag pour que ça soit le moins intrusif pour les utilisateurs... leur laisser le choix à tout prix. mais est-ce une bonne idée?
