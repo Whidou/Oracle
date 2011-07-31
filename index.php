@@ -2,37 +2,30 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" >
    <head>
        <title>Oracle - interface de recherche</title>
-       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-		<style type="text/css">
-table
-{
-   border-collapse: collapse;
-}
-td, th
-{
-   border: 1px solid black;
-   padding: 10px;
-}
-       </style>
-   
+       <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	   <link rel="stylesheet" media="screen" type="text/css" title="Design" href="css.css" />
    </head>
    <body>
+   <center>
+   <h3> Oracle : Interface de recherche</h3>
+   <div id="corps">
 <?php
 try
 {
 
-	$base= 'Oracle.sq3';					//Nom du fichier sq3
-	$table = 'Oracle';						//Nom de la table
-	
+	$base= '~/Oracle/Oracle.sq3';					//Nom du fichier sq3
+	$table = 'oracle';						//Nom de la table
 	// On se connecte à SQLite
 
     $pdo_options[PDO::ATTR_ERRMODE] = PDO::ERRMODE_EXCEPTION;    
     $bdd = new PDO("sqlite:".$base."");																
-    $query = 'SELECT * FROM oracle ORDER BY id';
     // On récupère tout le contenu de la table  !
     $reponse = $bdd->query("SELECT * FROM '".$table."' ORDER BY id"); 								
-    
-	echo '<table>
+
+   ?>
+   
+   <?php include('recherche.php'); ?>
+	<table>
    <caption>Index des liens</caption>
 
    <tr>
@@ -41,25 +34,24 @@ try
 	   <th>Lien</th>
        <th>Tags</th>
        <th>Heure</th>
-   </tr>';
+   </tr>
+    <?php 
+
+
+
 	// On affiche chaque entrée
     while ($donnees = $reponse->fetch())
     {
-   
-      echo  '<tr> 
-     <th><?php echo $donnees['auteur']; ?></th>
-     <th><?php echo $donnees['chan_orig']; ?> </th>
-	 <th><a href="<?php echo $donnees['link']; ?>"><?php echo $donnees['link']; ?></a></th>
-	 <th><?php echo $donnees['keywords']; ?></th>
-	 <th><?php echo date('d/m/Y H\hi', $donnees['date']); ?></th>
-	 </tr>';
+      $date = date('d/m/Y H\hi', $donnees['date']);
+$trans = array("," => ", ");
 
-	 
-	}
-
+ echo  '<tr> <th>'.$donnees['auteur'].'</th><th>'.$donnees['chan_orig'].' </th><th><a href="'.$donnees['link'].'">'.$donnees['link'].'</a></th><th>'.strtr($donnees['keywords'], $trans).' </th><th>'.$date.'</th></tr>';
+    }
+    ?>
 	
-	echo '</table>';
+	</table>
     
+	<?php
 	$reponse->closeCursor(); // Fin du traitement
 
 }
@@ -70,7 +62,8 @@ catch(Exception $e)
 }
 
 
-?>
-
+?></div><br/>
+<div id="footer"><p>Oracle web interface <a href="http://hgpub.druil.net/Oracle/">http://hgpub.druil.net/Oracle/</a></div>
+</center>
 </body>
 </html>
