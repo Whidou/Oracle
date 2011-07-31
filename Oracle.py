@@ -205,17 +205,16 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
         """Deletes a previously added url"""
         # Deux formes: "!delete last" et "!delete [URL]"
         chan = self.gettarget(msg)
-        if self.lasturl.has_key(chan):
-            if "!delete last" in msg:
-                if self.lasturl[chan]!="":
-                    url = self.lasturl[chan]
-            else:                           # Si une URL est fournie
-                url = msg[msg.find("!delete ")+8:]
-            self.db.execute("DELETE FROM %s WHERE link='%s'"%(self.name,
-                                                              url))
-            self.conn.commit()
+        if "!delete last" in msg and self.lasturl.has_key(chan):
+            if self.lasturl[chan]!="":
+                url = self.lasturl[chan]
             del self.lasturl[chan]
-            self.sendTo(chan,"Suppression effectuée.")
+        else:                           # Si une URL est fournie
+            url = msg[msg.find("!delete ")+8:]
+        self.db.execute("DELETE FROM %s WHERE link='%s'"%(self.name,
+                                                          url))
+        self.conn.commit()
+        self.sendTo(chan,"Suppression effectuée.")
 
     def help(self, msg, match):
         """Displays a minimal manual"""
