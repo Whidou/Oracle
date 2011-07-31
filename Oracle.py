@@ -11,20 +11,11 @@
 
 
 # -- Idées --
-#   - lorsque un lien est posté, le bot stock et demande en query des mots cle
 #   - Ajouter une gestion des exceptions.
-#   - !+tag1 tag2 tag3 au lieu de !+tag1 +tag2 +tag3 ?
+#   - Ajuster la création de bdd aux systèmes non-UNIX
+#   - Ajouter des options de recherche
 
-# TODO LIST
-# - Fonction !search ***
-# - Modifier la commande d'ajout de tag ***
-# - Permettre la suppression de tags **
-
-# BUGS
-# - Lors de la suppression, n'importe quel mot clef après !delete est accepté, et affiche le message de suppression [DONE]**
-# - Si un tag est ajouté/suppr alors que le dernier lien a été suppr, le bot plante [DONE] ***
-
-VERSION = "0.2.4"
+VERSION = "1.0.0"
 
 import re, os, sys, socket, time, sqlite3
 
@@ -40,7 +31,7 @@ class Oracle:
         self.configure()
         self.irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.stop()
-        self.lasturl={} #id de la derniere url postée sur un chan pour chaque self.chan[]
+        self.lasturl={}
         if not database:
             oraclePath = os.path.join(os.path.expanduser("~"), ".Oracle")
             if not os.path.exists(oraclePath):
@@ -54,6 +45,7 @@ link TEXT,\
 keywords TEXT,\
 date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
         self.conn = sqlite3.connect(str(database))
+        self.conn.text_factory = str
         self.db = self.conn.cursor()
 
     def configure(self):
@@ -71,13 +63,13 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
                            #                                        Ne peut se terminer par ., ,, ; ou :
                            #                                        Afin d'éviter de prendre la ponctuation
                            #                                        Du message dans l'URL
-                       "(?i)PRIVMSG .*? :!delete (last|(https?|ftp)://[a-z0-9\\-.@:]+\\.[a-z]{2,3}([.,;:]*[a-z0-9\\-_?'/\\\\+&%$#=~])*)":self.delete,
-                       "(?i)PRIVMSG .*? :!(\\+[a-z0-9_éèêïàôâî]+ ?)+$":self.tagadd,
+                       "(?i)PRIVMSG .*? :!delete( (https?|ftp)://[a-z0-9\\-.@:]+\\.[a-z]{2,3}([.,;:]*[a-z0-9\\-_?'/\\\\+&%$#=~])*)?":self.delete,
+                       "(?i)PRIVMSG .*? :!\\+ ?([a-z0-9_éèêïàôâî]+ ?)+$":self.tagadd,
                            # "\+[a-z0-9]+" Un + suivi d'au moins 1 caractère alphnumérique
                            # " ?" Suivi d'un espace ou pas
                            # "+" Le tout répété au moins une fois
                            #    "+tag01", "+234 +tag2" et "+tag1+tag2" sont donc des expressions valides
-                       "(?i)PRIVMSG .*? :!(\\-[a-z0-9]+ ?)+$":self.tagdel,
+                       "(?i)PRIVMSG .*? :!- ?([a-z0-9]+ ?)+$":self.tagdel,
                        "(?i)PRIVMSG .*? :!search( [a-z0-9]+)+$":self.search,
                            # " [a-z0-9]+" Un espace suivi d'au moins un caractère alphanumérique
                            # "+" Répété au moins une fois
@@ -174,9 +166,8 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
                 self.conn.commit()
             else:
                 #Ligne envoyée au chan si le lien est déjà présent.
-                self.sendTo(chan, str(fetch))
-                self.sendTo(chan,"%s est déjà présent avec %s comme mots-clefs"%(url,                # URL
-                                                                                 str(fetch[0][1]).replace(",", ", ")))   # Tags
+                self.sendTo(chan,"%s = %s"%(url,                                    # URL
+                                            str(fetch[0][1]).replace(",", ", ")))   # Tags
             self.lasturl[chan] = url # Stockage de l'url dans la "case" correspondant au chan
 
     def tagadd(self, msg, match):
@@ -186,26 +177,45 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
             self.db.execute("SELECT keywords FROM %s WHERE link='%s'"%(self.name,
                                                                        self.lasturl[chan]))
             self.db.execute("UPDATE %s SET keywords='%s' WHERE link='%s'"%(self.name,
-                                                                         "%s%s,"%(str(self.db.fetchall()[0][0]),
-                                                                                   ','.join(re.findall("[a-zA-Z0-9_éèêïàôâî]+",
-                                                                                                       msg[msg.find(" :"):]))),
-                                                                         self.lasturl[chan]))
+                                                                           "%s%s,"%(self.db.fetchall()[0][0],
+                                                                                    ','.join(re.findall("[a-zA-Z0-9_éèêïàôâî]+",
+                                                                                                        msg[msg.find(" :"):]))),
+                                                                           self.lasturl[chan]))
             self.conn.commit()
 
     def tagdel(self, msg, match):
         """deletes tag(s) to last URL"""
+        chan = self.gettarget(msg)
         if self.lasturl.has_key(chan):
-            pass
+            self.db.execute("SELECT keywords FROM %s WHERE link='%s'"%(self.name,
+                                                                       self.lasturl[chan]))
+            tags = self.db.fetchall()[0][0].split(",")
+            for deleted in re.findall("[a-zA-Z0-9_éèêïàôâî]+", msg[msg.find(" :"):]):
+                for tag in tags:
+                    if tag.lower() == deleted.lower():
+                        tags.remove(tag)
+            self.db.execute("UPDATE %s SET keywords='%s' WHERE link='%s'"%(self.name,
+                                                                           ','.join(tags),
+                                                                           self.lasturl[chan]))
+            self.conn.commit()
 
     def search(self, msg, match):
         """Searches for an URL with the given tags"""
-        pass
+        # Cherche "au moins un des mots"
+        # Remplacer le "OR" par un "AND"
+        # Pour chercher "tous les mots"
+        self.db.execute("SELECT link FROM %s WHERE keywords LIKE '%%%s%%'"%(self.name,
+                                                                        "%%' OR keywords LIKE '%%".join(re.findall("[a-zA-Z0-9_éèêïàôâî]+",
+                                                                                                               msg[msg.find(" :"):]))))
+        fetch = self.db.fetchall()
+        if len(fetch):
+            self.sendTo(self.gettarget(msg), "\n".join(zip(*fetch)[0]))
 
     def delete(self, msg, match):
         """Deletes a previously added url"""
-        # Deux formes: "!delete last" et "!delete [URL]"
+        # Deux formes: "!delete" et "!delete [URL]"
         chan = self.gettarget(msg)
-        if "!delete last" in msg and self.lasturl.has_key(chan):
+        if msg[-9:] == " :!delete" and self.lasturl.has_key(chan):
             if self.lasturl[chan]!="":
                 url = self.lasturl[chan]
             del self.lasturl[chan]
@@ -214,23 +224,23 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
         self.db.execute("DELETE FROM %s WHERE link='%s'"%(self.name,
                                                           url))
         self.conn.commit()
-        self.sendTo(chan,"Suppression effectuée.")
 
     def help(self, msg, match):
         """Displays a minimal manual"""
         self.sendTo(self.gettarget(msg),"""!help : Displays this message.
 !version : Displays Oracle's version.
-!delete last: deletes last seen URL.
-!delete url: deletes the specified url.
-!+tag1 +tag2 : adds tag1 and tag2 the last link.
+!delete : Deletes last URL.
+!delete url : Deletes URL.
+!+ tag1 tag2 : Adds tags to the last link.
+!- tag1 tag2 : Removes tags from the last link.
 !goto #foo : Goes to #foo.
 !quit : Leaves current channel.""")
         
     def version(self, msg, match):
         """Displays version data"""
-        self.sendTo(self.gettarget(msg),"""Oracle
+        self.sendTo(self.gettarget(msg),"""Oracle : Oracle Recherche, Accepte et Consulte les Liens Etonnants
 v%s
-Semi-functional beta version.
+First functional version \o/.
 http://hgpub.druil.net/Oracle/"""%VERSION)
 
 

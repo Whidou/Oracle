@@ -1,29 +1,38 @@
 Ce fichier servira d'échange asynchrone pour tous les dev travaillants sur ce projet:
 
-Recherche simple :
-!search tag
-!search tag1 tag2
-
 Si un tag correspond à un auteur, il faut le chercher. Penser à faire une recherche sur le pseudo +éventuellement des tag (comme [boulot])
 
 Ajouter une recherche par date et par personne.
 
-POYO insiste pour laisser au posteur du lien seul la possibilité d'ajouter des tags.
-	- le posteur du lien aura pas forcément envie de tagger, mieux vaut faire confiance à l'ensemble des présents. => entièrement d'accord.
-
 POYO souhaite pouvoir créer une interface web communiquant avec la bdd. Possibilitée de choisir sqlite/mysql?
 	- Oui, c'est faisable assez simplement. Il faudra juste penser à lancer Oracle depuis Druil.
-	=> le souci étant là. Il n'a pas accès à Avitus (mon serveur)
+		=> le souci étant là. Il n'a pas accès à Avitus (mon serveur)
+			- ...Et tu refuses de lui en laisser un ? (même limité ?)
 
 Faire un fichier de config? (module configparser relativement adapté) Attention à l'effet 'usine à gaz'
+	- Pour configurer quoi exactement ?
 
 Faut-il gérer les doublons comme "http://google.com/", "http://www.google.com/", "http://google.com" par exemple ? Pour l'instant, Oracle considère ces trois URL comme différentes.
 => ça alourdirait pas mal le code, je pense
 
 ALtay propose la possibilité de mute.
+	- Wait, wait... il parle pas le bot oO. Le seul moment où il sort une ligne c'est lors d'un repost ou d'une recherche
+
 POYO + Altay proposent de faire passer ce message en PV
+	-...quel message au juste ?
 
 Mais au fond, est-ce que le plus simple ne serait pas de faire [URL] [mots clefs séparés par une virgule] ?
-La suppression serait gerée via l'ajout toujours de - devant le tag à supprimer.
+	- À ajouter à la prochaine version
 
 Je voulais faire ce système de +tag -tag pour que ça soit le moins intrusif pour les utilisateurs... leur laisser le choix à tout prix. mais est-ce une bonne idée?
+	- La raison même de l'existence ou non de l'âme peut être remise en question par l'introspection poussée des méandres de la réflexion philosophique.
+
+1.0.0 BITCHES !!!!! \o/
+Mouhaha, ça marche.
+Bon, j'ai changé pas mal de truc, à commencer par l'encodage de la bdd (l'unicode faisait chier)
+Les commandes ont un peu changé, voir !help
+Botahn arrête pas de faire des !quit, c'est méchant :-(
+Si vous voyez encore des doubles virgules dans la bdd, une supprssion de tag devrait régler le problème
+	!+a
+	!-a
+La recherche est en "au moins un des mots" et pas "tous les mots", j'ai expliqué en commentaire comment changer.
