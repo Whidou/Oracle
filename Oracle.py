@@ -15,7 +15,7 @@
 #   - Ajuster la création de bdd aux systèmes non-UNIX
 #   - Ajouter des options de recherche
 
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 
 import re, os, sys, socket, time, sqlite3
 
@@ -69,8 +69,8 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
                            # " ?" Suivi d'un espace ou pas
                            # "+" Le tout répété au moins une fois
                            #    "+tag01", "+234 +tag2" et "+tag1+tag2" sont donc des expressions valides
-                       "(?i)PRIVMSG .*? :!- ?([a-z0-9]+ ?)+$":self.tagdel,
-                       "(?i)PRIVMSG .*? :!search( [a-z0-9]+)+$":self.search,
+                       "(?i)PRIVMSG .*? :!- ?([a-z0-9_éèêïàôâî]+ ?)+$":self.tagdel,
+                       "(?i)PRIVMSG .*? :!search( [a-z0-9_éèêïàôâî]+)+$":self.search,
                            # " [a-z0-9]+" Un espace suivi d'au moins un caractère alphanumérique
                            # "+" Répété au moins une fois
                        " :End of /MOTD command\\.":self.join,
@@ -184,7 +184,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
             self.conn.commit()
 
     def tagdel(self, msg, match):
-        """deletes tag(s) to last URL"""
+        """Deletes tag(s) from last URL"""
         chan = self.gettarget(msg)
         if self.lasturl.has_key(chan):
             self.db.execute("SELECT keywords FROM %s WHERE link='%s'"%(self.name,
@@ -205,8 +205,8 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
         # Remplacer le "OR" par un "AND"
         # Pour chercher "tous les mots"
         self.db.execute("SELECT link FROM %s WHERE keywords LIKE '%%%s%%'"%(self.name,
-                                                                        "%%' OR keywords LIKE '%%".join(re.findall("[a-zA-Z0-9_éèêïàôâî]+",
-                                                                                                               msg[msg.find(" :"):]))))
+                                                                            "%%' OR keywords LIKE '%%".join(re.findall("[a-zA-Z0-9_éèêïàôâî]+",
+                                                                                                                       msg[msg.find(" :"):]))))
         fetch = self.db.fetchall()
         if len(fetch):
             self.sendTo(self.gettarget(msg), "\n".join(zip(*fetch)[0]))
