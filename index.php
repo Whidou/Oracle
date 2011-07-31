@@ -21,7 +21,7 @@ td, th
 try
 {
 
-	$base= '~/.Oracle/Oracle.sq3';					//Nom du fichier sq3
+	$base= 'Oracle.sq3';					//Nom du fichier sq3
 	$table = 'Oracle';						//Nom de la table
 	
 	// On se connecte à SQLite
