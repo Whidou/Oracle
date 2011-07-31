@@ -29,12 +29,8 @@ $search = $bdd->query("SELECT * FROM ".$table." WHERE ".$valeur_requete."");
 $arr = $results[0];
 
 
-
-echo "Vous avez recherché ".$recherche."<br><br>\n";
-
-
 	echo "<table>
-   <caption>Index des liens</caption>
+   <caption>Resultat de la recherche pour ".$recherche."</caption>
 
    <tr>
        <th>Pseudo</th>
@@ -47,14 +43,28 @@ echo "Vous avez recherché ".$recherche."<br><br>\n";
 // On affiche chaque entrée
     while ($donnees = $search->fetch())
     {
-      $date = date('d/m/Y H\hi', $donnees['date']); 
- echo  '<tr> <th>'.$donnees['auteur'].'</th><th>'.$donnees['chan_orig'].' </th><th><a href="'.$donnees['link'].'">'.$donnees['link'].'</a></th><th>'.$donnees['keywords'].'</th><th>'.$date.'</th></tr>';
-    }
+	$fin = substr("".$donnees['link']."", -4); 
+$debut = substr("".$donnees['link']."", 0, 35);  
+$trans = array("," => ", ");	
+  $date = date('d/m/Y H\hi', $donnees['date']); 
+  
+if (strlen($donnees['link']) <= 35)
+ { 
+ echo  '<tr> <td>'.$donnees['auteur'].'</td><td>'.$donnees['chan_orig'].' </td><td><a href="'.$donnees['link'].'">'.$donnees['link'].'</a></td><td>'.strtr($donnees['keywords'], $trans).'</td><td>'.$date.'</td></tr>';
+}
+else
+{
+ echo  '<tr> <td>'.$donnees['auteur'].'</td><td>'.$donnees['chan_orig'].' </td><td><a href="'.$donnees['link'].'">'.$debut.'...'.$fin.'</a></td><td>'.strtr($donnees['keywords'], $trans).'</td><td>'.$date.'</td></tr>';
+}
+	}
 	
 	}
 	else {
 	}
 echo "</table>";
+
     ?>
+	
+
 	
 	
