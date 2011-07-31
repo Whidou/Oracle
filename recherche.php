@@ -36,7 +36,7 @@ $valeur_requete .= 'OR '.$base_choisie.' LIKE \'%' . $mots[$nombre_mots_boucle] 
 }
 $valeur_requete = ltrim($valeur_requete,'OR'); //suppression de AND au début de la boucle
 
-$search = $bdd->query("SELECT * FROM ".$table." WHERE ".$valeur_requete." ORDER BY ".$classer." "); 	//On envoie une requète qui, selon la recherche lira la table indiquée, cherchera les mot clés et classera les résultats en fonction de ce qu'aura indiqué l'utilisateur
+$search = $bdd->query("SELECT * FROM ".$table." WHERE ".$valeur_requete." ORDER BY ".$classer." DESC "); 	//On envoie une requète qui, selon la recherche lira la table indiquée, cherchera les mot clés et classera les résultats en fonction de ce qu'aura indiqué l'utilisateur
 
 $arr = $results[0];
 

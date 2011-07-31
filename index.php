@@ -11,7 +11,7 @@
    <div id="float"><h2> Oracle Recherche, Accepte et Consulte les Liens Etonnants</h2><br/> </div>
   
 <?php
-	$base= '~/Oracle/Oracle.sq3';					//Nom du fichier sq3
+	$base= 'Oracle.sq3';					//Nom du fichier sq3
 	$table = 'oracle';						//Nom de la table
 	// On se connecte à SQLite
 
@@ -19,8 +19,6 @@
     $bdd = new PDO("sqlite:".$base."");																
     // On récupère tout le contenu de la table  !
 	
-
-
 
 
    
@@ -42,35 +40,39 @@ include('recherche.php');
 	   <th>Lien</th>
        <th>Tags</th>
        <th>Heure</th>
+       <th>Modifier les tags</th>
    </tr>';
  
 
 
 $a = 1;
-	// On affiche chaque entrée
-    	
-	if ($_POST['classement'] == '')
+	    
+	if ($_POST['classement'] == '')					// On affiche chaque entrée
 	{
 	$reponse = $bdd->query("SELECT * FROM '".$table."' ORDER BY id DESC LIMIT 0,100");
-	
+
 	while ($donnees = $reponse->fetch())
     {
+	$id = $donnees['id'];
+	if (isset($_POST['tags']))
+	{
+	$trans2 = array(" " => ",");							//on emplace les espaces par des virgules
+	$bdd->exec("UPDATE ".$table." SET keywords = '".$donnees['keywords'].",".strtr($_POST['tags'], $trans2)."' WHERE id = '".$donnees['id']."' ");
+	}	
       $date = date('d/m/Y H\hi', $donnees['date']);			//formatage de la date
 $trans = array("," => ", ");											//Mise en place d'espaces entre chaque tags
 
-
-
 if (strlen($donnees['link']) <= 36)								//Si le lien n'est pas trop long (si il fait moins de x caractères)
  { 
-
- echo  '<tr> <td>'.$a++.'   </td><td>'.$donnees['auteur'].'</td><td>'.$donnees['chan_orig'].' </td><td><a href="'.$donnees['link'].'">'.$donnees['link'].'</a></td><td>'.strtr($donnees['keywords'], $trans).'</td><td>'.$date.'</td></tr>';
+ $link = $donnees['link'];
+ echo '<tr> <td>'.$a++.'   </td><td>'.$donnees['auteur'].'</td><td>'.$donnees['chan_orig'].' </td><td><a href="'.$donnees['link'].'">'.$donnees['link'].'</a></td><td>'.strtr($donnees['keywords'], $trans).'</td><td>'.$date.'</td><td><form method="post" action="index.php" id="tags"><input type="text" name="tags" /><input type="submit" value="Ajouter" name="valitags" /></form></td></tr>';
 }
 else																			//Si le lien est trop long (plus de x caractères)
 {
-
+ $link = $donnees['link'];
 $fin = substr("".$donnees['link']."", -4); 						//On garde les 4 derniers caractères.
 $debut = substr("".$donnees['link']."", 0, 35);  				//On conserve les 35 premiers
- echo  '<tr> <td>'.$a++.'   </td><td>'.$donnees['auteur'].'</td><td>'.$donnees['chan_orig'].' </td><td><a href="'.$donnees['link'].'">'.$debut.'...'.$fin.'</a></td><td>'.strtr($donnees['keywords'], $trans).'</td><td>'.$date.'</td></tr>';
+ echo  '<tr> <td>'.$a++.'   </td><td>'.$donnees['auteur'].'</td><td>'.$donnees['chan_orig'].' </td><td><a href="'.$donnees['link'].'">'.$debut.'...'.$fin.'</a></td><td>'.strtr($donnees['keywords'], $trans).'</td><td>'.$date.'</td><td><form method="post" action="index.php" id="tags"><input type="text" name="tags" /><input type="submit" value="Ajouter" name="valitags" /></form></td></tr>';
 }
    }
 
@@ -95,20 +97,20 @@ $trans = array("," => ", ");											//Mise en place d'espaces entre chaque ta
 
 if (strlen($donnees['link']) <= 36)								//Si le lien n'est pas trop long (si il fait moins de x caractères)
  { 
- echo  '<tr> <td>'.$a++.'   </td><td>'.$donnees['auteur'].'</td><td>'.$donnees['chan_orig'].' </td><td><a href="'.$donnees['link'].'">'.$donnees['link'].'</a></td><td>'.strtr($donnees['keywords'], $trans).'</td><td>'.$date.'</td></tr>';
+ $link = $donnees['link'];
+ echo  '<tr> <td>'.$a++.'   </td><td>'.$donnees['auteur'].'</td><td>'.$donnees['chan_orig'].' </td><td><a href="'.$donnees['link'].'">'.$donnees['link'].'</a></td><td>'.strtr($donnees['keywords'], $trans).'</td><td>'.$date.'</td><td><form method="post" action="index.php" id="tags"><input type="text" name="tags"/><input type="submit" value="Ajouter" name="valitags" /></form></td></tr>';
 }
 else																			//Si le lien est trop long (plus de x caractères)
 {
+
 $fin = substr("".$donnees['link']."", -4); 						//On garde les 4 derniers caractères.
 $debut = substr("".$donnees['link']."", 0, 35);  				//On conserve les 35 premiers
- echo  '<tr>  <td>'.$a++.'  </td><td>'.$donnees['auteur'].'</td><td>'.$donnees['chan_orig'].' </td><td><a href="'.$donnees['link'].'">'.$debut.'...'.$fin.'</a></td><td>'.strtr($donnees['keywords'], $trans).'</td><td>'.$date.'</td></tr>';
+ echo  '<tr>  <td>'.$a++.'  </td><td>'.$donnees['auteur'].'</td><td>'.$donnees['chan_orig'].' </td><td><a href="'.$donnees['link'].'">'.$debut.'...'.$fin.'</a></td><td>'.strtr($donnees['keywords'], $trans).'</td><td>'.$date.'</td><td><form method="post" action="index.php" id="tags"><input type="text" name="tags"/><input type="submit" value="Ajouter" name="valitags" /></form></td></tr>';
 }
    }
 
 	
 	echo "</table>";
-    
-
 	$reponse->closeCursor(); // Fin du traitement
 }
 ?>
