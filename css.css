@@ -2,6 +2,7 @@ body
 {
 width : 99%;
 background-color: #6E86D6;
+font-size: 0.7em;
 }		
 
 #corps
@@ -9,12 +10,8 @@ background-color: #6E86D6;
 max-width: 90%;
 background-color: #4869D6;
 padding : 10px;
+margin: 10px;
 border: 1px solid #B85D9;
-}
-
-#corps p 
-{
-font-size: 0.8em;
 }
 
 a
@@ -26,14 +23,11 @@ a:visited
 color: #132A74;
 }
 
-table
+table, tr
 {
    border-collapse: collapse;
-   width: 80%;
 }
 td, th
 {
    border: 1px solid black;
-   padding: 10px;
-   max-width : 10%;
 } 

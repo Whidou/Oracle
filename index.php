@@ -13,7 +13,7 @@
 try
 {
 
-	$base= '~/Oracle/Oracle.sq3';					//Nom du fichier sq3
+	$base= 'Oracle.sq3';					//Nom du fichier sq3
 	$table = 'oracle';						//Nom de la table
 	// On se connecte à SQLite
 
@@ -24,7 +24,7 @@ try
 
    ?>
    
-   <?php include('recherche.php'); ?>
+   <?php include('recherche.php5'); ?>
 	<table>
    <caption>Index des liens</caption>
 
