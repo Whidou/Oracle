@@ -57,7 +57,7 @@ $a = 1;
 	if (isset($_POST['tags']))
 	{
 	$trans2 = array(" " => ",");							//on emplace les espaces par des virgules
-	$bdd->exec("UPDATE ".$table." SET keywords = '".$donnees['keywords'].",".strtr($_POST['tags'], $trans2)."' WHERE id = '".$donnees['id']."' ");
+	$bdd->exec("UPDATE ".$table." SET keywords = '".$donnees['keywords'].",".strtr($_POST['tags'], $trans2)."' WHERE id = '".$_POST['id']."' ");
 	}	
       $date = date('d/m/Y H\hi', $donnees['date']);			//formatage de la date
 $trans = array("," => ", ");											//Mise en place d'espaces entre chaque tags
@@ -65,7 +65,7 @@ $trans = array("," => ", ");											//Mise en place d'espaces entre chaque ta
 if (strlen($donnees['link']) <= 36)								//Si le lien n'est pas trop long (si il fait moins de x caractères)
  { 
  $link = $donnees['link'];
- echo '<tr> <td>'.$a++.'   </td><td>'.$donnees['auteur'].'</td><td>'.$donnees['chan_orig'].' </td><td><a href="'.$donnees['link'].'">'.$donnees['link'].'</a></td><td>'.strtr($donnees['keywords'], $trans).'</td><td>'.$date.'</td><td><form method="post" action="index.php" id="tags"><input type="text" name="tags" /><input type="submit" value="Ajouter" name="valitags" /></form></td></tr>';
+ echo '<tr> <td>'.$a++.'   </td><td>'.$donnees['auteur'].'</td><td>'.$donnees['chan_orig'].' </td><td><a href="'.$donnees['link'].'">'.$donnees['link'].'</a></td><td>'.strtr($donnees['keywords'], $trans).'</td><td>'.$date.'</td><td><form method="post" action="index.php" id="tags"><input type="hidden" name="id" value="'.$donnees['id'].'"/><input type="text" name="tags" /><input type="submit" value="Ajouter" name="valitags" /></form></td></tr>';
 }
 else																			//Si le lien est trop long (plus de x caractères)
 {
