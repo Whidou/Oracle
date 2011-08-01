@@ -11,7 +11,7 @@
    <div id="float"><h2> Oracle Recherche, Accepte et Consulte les Liens Etonnants</h2><br/> </div>
   
 <?php
-$base= 'Oracle.sq3';					//Nom du fichier sq3
+$base= '~/Oracle/Oracle.sq3';					//Nom du fichier sq3
 $table = 'oracle';						//Nom de la table
 // On se connecte à SQLite
 $pdo_options[PDO::ATTR_ERRMODE] = PDO::ERRMODE_EXCEPTION;    

@@ -45,11 +45,13 @@ $arr = $results[0];
 	<caption>R&eacute;sultat de la recherche pour ".$recherche." :</caption>
 
    <tr>
+       <th>#</th>
        <th>Auteur</th>
        <th>Channel</th>
 	   <th>Lien</th>
        <th>Tags</th>
        <th>Heure</th>
+       <th>Modifier les tags</th>
    </tr>";
 
 // On affiche chaque entrée
@@ -59,14 +61,14 @@ $arr = $results[0];
 $debut = substr("".$donnees['link']."", 0, 35);  
 $trans = array("," => ", ");	
   $date = date('d/m/Y H\hi', $donnees['date']); 
-  
+  $a =1;
 if (strlen($donnees['link']) <= 36)
  { 
- echo  '<tr> <td>'.$donnees['auteur'].'</td><td>'.$donnees['chan_orig'].' </td><td><a href="'.$donnees['link'].'">'.$donnees['link'].'</a></td><td>'.strtr($donnees['keywords'], $trans).'</td><td>'.$date.'</td></tr>';
+ echo  '<tr> <td>'.$a++.'   </td><td>'.$donnees['auteur'].'</td><td>'.$donnees['chan_orig'].' </td><td><a href="'.$donnees['link'].'">'.$donnees['link'].'</a></td><td>'.strtr($donnees['keywords'], $trans).'</td><td>'.$date.'</td><td><form method="post" action="index.php" id="tags"><input type="hidden" id="id" name="id" value="'.$donnees['id'].'"/><input type="text" name="tags" /><input type="submit" value="Ajouter" name="valitags" /></form></td></tr>';
 }
 else
 {
- echo  '<tr> <td>'.$donnees['auteur'].'</td><td>'.$donnees['chan_orig'].' </td><td><a href="'.$donnees['link'].'">'.$debut.'...'.$fin.'</a></td><td>'.strtr($donnees['keywords'], $trans).'</td><td>'.$date.'</td></tr>';
+ echo  '<tr> <td>'.$a++.'   </td><td>'.$donnees['auteur'].'</td><td>'.$donnees['chan_orig'].' </td><td><a href="'.$donnees['link'].'">'.$donnees['link'].'</a></td><td>'.strtr($donnees['keywords'], $trans).'</td><td>'.$date.'</td><td><form method="post" action="index.php" id="tags"><input type="hidden" id="id" name="id" value="'.$donnees['id'].'"/><input type="text" name="tags" /><input type="submit" value="Ajouter" name="valitags" /></form></td></tr>';
 }
 
 }
