@@ -15,7 +15,7 @@
 #   - Ajuster la création de bdd aux systèmes non-UNIX
 #   - Ajouter des options de recherche
 
-VERSION = "1.0.1"
+VERSION = "1.0.2"
 
 import re, os, sys, socket, time, sqlite3
 
@@ -166,8 +166,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
                 self.conn.commit()
             else:
                 #Ligne envoyée au chan si le lien est déjà présent.
-                self.sendTo(chan,"%s = %s"%(url,                                    # URL
-                                            str(fetch[0][1]).replace(",", ", ")))   # Tags
+                self.sendTo(chan,fetch[0][1].replace(",", ", ")[:-2])
             self.lasturl[chan] = url # Stockage de l'url dans la "case" correspondant au chan
 
     def tagadd(self, msg, match):
@@ -240,7 +239,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
         """Displays version data"""
         self.sendTo(self.gettarget(msg),"""Oracle : Oracle Recherche, Accepte et Consulte les Liens Etonnants
 v%s
-First functional version \o/.
+Functional version \o/.
 http://hgpub.druil.net/Oracle/"""%VERSION)
 
 
