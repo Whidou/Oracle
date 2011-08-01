@@ -17,21 +17,33 @@
 #
 ###########################################################################
 -->
-<form method="post" action="index.php">
-Votre recherche :
+<form method="post" action="index.php" id="formulaire">
+<p>Votre recherche :</p>
 <input type="text" name="recherche" /><br/>
-Effectuer une recherche par :
-<input type="radio" name="base_choisie" value="keywords" checked="checked"><label for="keywords">Tags</label>
-<input type="radio" name="base_choisie" value="auteur"> <label for="auteur">Auteur</label>
-<input type="radio" name="base_choisie" value="chan_orig"><label for="chan_orig">Chan</label>
+<p>Effectuer une recherche par :</p>
+<input type="radio" name="base_choisie" value="keywords" checked="checked"/><label for="keywords">Tags</label>
+<input type="radio" name="base_choisie" value="auteur"/> <label for="auteur">Auteur</label>
+<input type="radio" name="base_choisie" value="chan_orig"/><label for="chan_orig">Channel</label><br/>
+<p>Classer les r&eacute;sultats par :</p>
+<input type="radio" name="classer" value="id" checked="checked"/> <label for="auteur">Date</label>
+<input type="radio" name="classer" value="auteur"/> <label for="auteur">Auteur</label>
+<input type="radio" name="classer" value="chan_orig"/> <label for="auteur">Channel</label>
 <input type="submit" value="Rechercher" name="rechercher" />
 </form><br/><br/>
+
+
 <?php
-	if (isset($_POST['rechercher'])) //si on a validé le formulaire
+if ($_POST['recherche'] == ''){
+
+} 
+else {
+
 {
+echo "<table>";
 	$recherche=  htmlspecialchars ( $_POST [ 'recherche' ]);
 
 	$base_choisie = $_POST['base_choisie'];
+	$classer = $_POST['classer'];
 	
 $mots = explode(' ', $recherche); //séparation des mots de la recherche à chaque espace grâce à explode
 $nombre_mots = count ($mots); //comptage du nombre de mots
@@ -43,20 +55,22 @@ $valeur_requete .= 'OR '.$base_choisie.' LIKE \'%' . $mots[$nombre_mots_boucle] 
 }
 $valeur_requete = ltrim($valeur_requete,'OR'); //suppression de AND au début de la boucle
 
-$search = $bdd->query("SELECT * FROM ".$table." WHERE ".$valeur_requete.""); 		
+$search = $bdd->query("SELECT * FROM ".$table." WHERE ".$valeur_requete." ORDER BY ".$classer." DESC "); 	//On envoie une requète qui, selon la recherche lira la table indiquée, cherchera les mot clés et classera les résultats en fonction de ce qu'aura indiqué l'utilisateur
 
 $arr = $results[0];
 
 
-	echo "<table>
-   <caption>Resultat de la recherche pour ".$recherche."</caption>
+	echo "
+	<caption>R&eacute;sultat de la recherche pour ".$recherche." :</caption>
 
    <tr>
-       <th>Pseudo</th>
+       <th>#</th>
+       <th>Auteur</th>
        <th>Channel</th>
 	   <th>Lien</th>
        <th>Tags</th>
        <th>Heure</th>
+       <th>Modifier les tags</th>
    </tr>";
 
 // On affiche chaque entrée
@@ -66,21 +80,23 @@ $arr = $results[0];
 $debut = substr("".$donnees['link']."", 0, 35);  
 $trans = array("," => ", ");	
   $date = date('d/m/Y H\hi', $donnees['date']); 
-  
-if (strlen($donnees['link']) <= 35)
+  $a =1;
+if (strlen($donnees['link']) <= 36)
  { 
- echo  '<tr> <td>'.$donnees['auteur'].'</td><td>'.$donnees['chan_orig'].' </td><td><a href="'.$donnees['link'].'">'.$donnees['link'].'</a></td><td>'.strtr($donnees['keywords'], $trans).'</td><td>'.$date.'</td></tr>';
+ echo  '<tr> <td>'.$a++.'   </td><td>'.$donnees['auteur'].'</td><td>'.$donnees['chan_orig'].' </td><td><a href="'.$donnees['link'].'">'.$donnees['link'].'</a></td><td>'.strtr($donnees['keywords'], $trans).'</td><td>'.$date.'</td><td><form method="post" action="index.php" id="tags"><input type="hidden" id="id" name="id" value="'.$donnees['id'].'"/><input type="text" name="tags" /><input type="submit" value="Ajouter" name="valitags" /></form></td></tr>';
 }
 else
 {
- echo  '<tr> <td>'.$donnees['auteur'].'</td><td>'.$donnees['chan_orig'].' </td><td><a href="'.$donnees['link'].'">'.$debut.'...'.$fin.'</a></td><td>'.strtr($donnees['keywords'], $trans).'</td><td>'.$date.'</td></tr>';
+ echo  '<tr> <td>'.$a++.'   </td><td>'.$donnees['auteur'].'</td><td>'.$donnees['chan_orig'].' </td><td><a href="'.$donnees['link'].'">'.$donnees['link'].'</a></td><td>'.strtr($donnees['keywords'], $trans).'</td><td>'.$date.'</td><td><form method="post" action="index.php" id="tags"><input type="hidden" id="id" name="id" value="'.$donnees['id'].'"/><input type="text" name="tags" /><input type="submit" value="Ajouter" name="valitags" /></form></td></tr>';
 }
-	}
+
+}
+	echo "</table>";
+	
 	
 	}
-	else {
-	}
-echo "</table>";
+
+}
 
     ?>
 	

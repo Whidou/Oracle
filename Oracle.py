@@ -29,7 +29,7 @@
 #   - Ajuster la création de bdd aux systèmes non-UNIX
 #   - Ajouter des options de recherche
 
-VERSION = "1.0.0"
+VERSION = "1.0.2"
 
 import re, os, sys, socket, time, sqlite3
 
@@ -83,8 +83,8 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
                            # " ?" Suivi d'un espace ou pas
                            # "+" Le tout répété au moins une fois
                            #    "+tag01", "+234 +tag2" et "+tag1+tag2" sont donc des expressions valides
-                       "(?i)PRIVMSG .*? :!- ?([a-z0-9]+ ?)+$":self.tagdel,
-                       "(?i)PRIVMSG .*? :!search( [a-z0-9]+)+$":self.search,
+                       "(?i)PRIVMSG .*? :!- ?([a-z0-9_éèêïàôâî]+ ?)+$":self.tagdel,
+                       "(?i)PRIVMSG .*? :!search( [a-z0-9_éèêïàôâî]+)+$":self.search,
                            # " [a-z0-9]+" Un espace suivi d'au moins un caractère alphanumérique
                            # "+" Répété au moins une fois
                        " :End of /MOTD command\\.":self.join,
@@ -180,8 +180,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
                 self.conn.commit()
             else:
                 #Ligne envoyée au chan si le lien est déjà présent.
-                self.sendTo(chan,"%s = %s"%(url,                                    # URL
-                                            str(fetch[0][1]).replace(",", ", ")))   # Tags
+                self.sendTo(chan,fetch[0][1].replace(",", ", ")[:-2])
             self.lasturl[chan] = url # Stockage de l'url dans la "case" correspondant au chan
 
     def tagadd(self, msg, match):
@@ -198,7 +197,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
             self.conn.commit()
 
     def tagdel(self, msg, match):
-        """deletes tag(s) to last URL"""
+        """Deletes tag(s) from last URL"""
         chan = self.gettarget(msg)
         if self.lasturl.has_key(chan):
             self.db.execute("SELECT keywords FROM %s WHERE link='%s'"%(self.name,
@@ -219,8 +218,8 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
         # Remplacer le "OR" par un "AND"
         # Pour chercher "tous les mots"
         self.db.execute("SELECT link FROM %s WHERE keywords LIKE '%%%s%%'"%(self.name,
-                                                                        "%%' OR keywords LIKE '%%".join(re.findall("[a-zA-Z0-9_éèêïàôâî]+",
-                                                                                                               msg[msg.find(" :"):]))))
+                                                                            "%%' OR keywords LIKE '%%".join(re.findall("[a-zA-Z0-9_éèêïàôâî]+",
+                                                                                                                       msg[msg.find(" :"):]))))
         fetch = self.db.fetchall()
         if len(fetch):
             self.sendTo(self.gettarget(msg), "\n".join(zip(*fetch)[0]))
@@ -254,7 +253,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
         """Displays version data"""
         self.sendTo(self.gettarget(msg),"""Oracle : Oracle Recherche, Accepte et Consulte les Liens Etonnants
 v%s
-First functional version \o/.
+Functional version \o/.
 http://hgpub.druil.net/Oracle/"""%VERSION)
 
 
