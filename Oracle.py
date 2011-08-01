@@ -29,7 +29,7 @@
 #   - Ajuster la création de bdd aux systèmes non-UNIX
 #   - Ajouter des options de recherche
 
-VERSION = "1.0.3"
+VERSION = "1.0.4"
 
 import re, os, sys, socket, time, sqlite3
 
@@ -78,13 +78,13 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
                            #                                        Afin d'éviter de prendre la ponctuation
                            #                                        Du message dans l'URL
                        "(?i)PRIVMSG .*? :!delete( (https?|ftp)://[a-z0-9\\-.@:]+\\.[a-z]{2,3}([.,;:]*[a-z0-9\\-_?'/\\\\+&%$#=~])*)?":self.delete,
-                       "(?i)PRIVMSG .*? :!\\+ ?([a-z0-9_éèêïàôâîç]{3,30} ?)+$":self.tagadd,
+                       "(?i)PRIVMSG .*? :!\\+ ?([a-z0-9_éèêïàôâîç]+ ?)+$":self.tagadd,
                            # "\+[a-z0-9]+" Un + suivi d'au moins 1 caractère alphnumérique
                            # " ?" Suivi d'un espace ou pas
                            # "+" Le tout répété au moins une fois
                            #    "+tag01", "+234 +tag2" et "+tag1+tag2" sont donc des expressions valides
-                       "(?i)PRIVMSG .*? :!- ?([a-z0-9_éèêïàôâîç]{3,30} ?)+$":self.tagdel,
-                       "(?i)PRIVMSG .*? :!search( [a-z0-9_éèêïàôâîç]{3,30})+$":self.search,
+                       "(?i)PRIVMSG .*? :!- ?([a-z0-9_éèêïàôâîç]+ ?)+$":self.tagdel,
+                       "(?i)PRIVMSG .*? :!search( [a-z0-9_éèêïàôâîç]+)+$":self.search,
                            # " [a-z0-9]+" Un espace suivi d'au moins un caractère alphanumérique
                            # "+" Répété au moins une fois
                        " :End of /MOTD command\\.":self.join,
@@ -191,7 +191,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
             self.db.execute("SELECT keywords FROM %s WHERE link='%s'"%(self.name,
                                                                        self.lasturl[chan]))
             self.db.execute("UPDATE %s SET keywords='%s' WHERE link='%s'"%(self.name,
-                                                                           "%s%s,"%(self.db.fetchall()[0][0],
+                                                                           "%s%s,"%(self.db.fetchall()[0][0].replace(",,",","),
                                                                                     ','.join(re.findall("[a-zA-Z0-9_éèêïàôâîç]{3,30}",
                                                                                                         msg[msg.find(" :"):]))),
                                                                            self.lasturl[chan]))
@@ -219,7 +219,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
         # Remplacer le "OR" par un "AND"
         # Pour chercher "tous les mots"
         self.db.execute("SELECT link FROM %s WHERE keywords LIKE '%%%s%%'"%(self.name,
-                                                                            "%%' OR keywords LIKE '%%".join(re.findall("[a-zA-Z0-9_éèêïàôâî]+",
+                                                                            "%%' OR keywords LIKE '%%".join(re.findall("[a-zA-Z0-9_éèêïàôâî]{3,30}",
                                                                                                                        msg[msg.find(" :"):]))))
         fetch = self.db.fetchall()
         if len(fetch):
