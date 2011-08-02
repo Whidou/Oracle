@@ -29,7 +29,7 @@
 #   - Ajuster la création de bdd aux systèmes non-UNIX
 #   - Ajouter des options de recherche
 
-VERSION = "1.0.8"
+VERSION = "1.0.9"
 
 import re, os, sys, socket, time, sqlite3, urllib
 
@@ -218,23 +218,26 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
 
     def search(self, msg, match):
         """Searches for an URL with the given tags"""
+        chan = self.gettarget(msg)
         self.db.execute("SELECT link, keywords FROM %s WHERE keywords LIKE '%%%s%%'"%(self.name,
-                                                                                      "%%' AND keywords LIKE '%%".join(re.findall("[a-zA-Z0-9_\\-éèêïàôâî]{2,30}",
-                                                                                                                                 msg[msg.find(" :"):]))))
+                                                                                      "%%' AND keywords LIKE '%%".join(re.findall("[a-zA-Z0-9_\\-éèêïàôâîç]{2,30}",
+                                                                                                                                 msg[msg.find(" :!search")+9:]))))
         fetch = self.db.fetchall()
         if len(fetch):
             for result in fetch:
-                self.sendTo(self.gettarget(msg), "%s (%s)"%(result[0],
+                self.sendTo(chan, "%s (%s)"%(result[0],
                                                             result[1][:-1].replace(",", ", ")))
+            url = result[0]
         else:
             query = urllib.urlencode({'q' : msg[msg.find("!search ")+8:]})
             url = 'http://ajax.googleapis.com/ajax/services/search/images?v=1.0&%s'% (query)
             search_results = urllib.urlopen(url)
-            result = search_results.read()
+            url = search_results.read()
             search_results.close()
-            result = result[result.find("\"url\":\"")+7:]
-            result = result[:result.find("\",\"")]
-            self.sendTo(self.gettarget(msg), "%s\n"%result)
+            url = url[url.find("\"url\":\"")+7:]
+            url = url[:url.find("\",\"")]
+            self.sendTo(chan, "%s\n"%url)
+        self.lasturl[chan] = url
 
     def delete(self, msg, match):
         """Deletes a previously added url"""
@@ -258,6 +261,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
 !delete url : Deletes URL.
 !+ tag1 tag2 : Adds tags to the last link.
 !- tag1 tag2 : Removes tags from the last link.
+!search tag1 tag2 : Searches links linked to tag1 AND tag2.
 !goto #foo : Goes to #foo.
 !quit : Leaves current channel.""")
         
