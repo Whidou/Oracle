@@ -29,7 +29,7 @@
 #   - Ajuster la création de bdd aux systèmes non-UNIX
 #   - Ajouter des options de recherche
 
-VERSION = "1.0.7"
+VERSION = "1.0.8"
 
 import re, os, sys, socket, time, sqlite3, urllib
 
@@ -78,13 +78,13 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
                            #                                        Afin d'éviter de prendre la ponctuation
                            #                                        Du message dans l'URL
                        "(?i)PRIVMSG .*? :!delete( (https?|ftp)://[a-z0-9\\-.@:]+\\.[a-z]{2,3}([.,;:]*[a-z0-9\\-_?'/\\\\+&%$#=~])*)?":self.delete,
-                       "(?i)PRIVMSG .*? :!\\+ ?([a-z0-9_\\-éèêïàôâîç]+ ?)+$":self.tagadd,
+                       "(?i)PRIVMSG .*? :!\\+.*$":self.tagadd,
                            # "\+[a-z0-9]+" Un + suivi d'au moins 1 caractère alphnumérique
                            # " ?" Suivi d'un espace ou pas
                            # "+" Le tout répété au moins une fois
                            #    "+tag01", "+234 +tag2" et "+tag1+tag2" sont donc des expressions valides
-                       "(?i)PRIVMSG .*? :!-( ?[a-z0-9_\\-éèêïàôâîç]+)+$":self.tagdel,
-                       "(?i)PRIVMSG .*? :!search( [a-z0-9_\\-éèêïàôâîç]+)+$":self.search,
+                       "(?i)PRIVMSG .*? :!-.*$":self.tagdel,
+                       "(?i)PRIVMSG .*? :!search .*$":self.search,
                            # " [a-z0-9]+" Un espace suivi d'au moins un caractère alphanumérique
                            # "+" Répété au moins une fois
                        " :End of /MOTD command\\.":self.join,
@@ -218,11 +218,8 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
 
     def search(self, msg, match):
         """Searches for an URL with the given tags"""
-        # Cherche "au moins un des mots"
-        # Remplacer le "OR" par un "AND"
-        # Pour chercher "tous les mots"
         self.db.execute("SELECT link, keywords FROM %s WHERE keywords LIKE '%%%s%%'"%(self.name,
-                                                                                      "%%' OR keywords LIKE '%%".join(re.findall("[a-zA-Z0-9_\\-éèêïàôâî]{2,30}",
+                                                                                      "%%' AND keywords LIKE '%%".join(re.findall("[a-zA-Z0-9_\\-éèêïàôâî]{2,30}",
                                                                                                                                  msg[msg.find(" :"):]))))
         fetch = self.db.fetchall()
         if len(fetch):
