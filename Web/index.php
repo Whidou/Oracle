@@ -1,22 +1,3 @@
-<!--
-###########################################################################
-#	 This file is part of Oracle.
-#
-# 	Oracle is free software: you can redistribute it and/or modify
-#	it under the terms of the GNU General Public License as published by
-#	the Free Software Foundation, either version 3 of the License, or
-#	(at your option) any later version.
-#
-#	Oracle is distributed in the hope that it will be useful,
-#	but WITHOUT ANY WARRANTY; without even the implied warranty of
-#	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#	GNU General Public License for more details.
-#
-#	You should have received a copy of the GNU General Public License
-# 	along with Oracle.  If not, see <http://www.gnu.org/licenses/>.
-#
-###########################################################################
--->
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" >
    <head>
@@ -30,7 +11,7 @@
    <div id="float"><h2> Oracle Recherche, Accepte et Consulte les Liens Etonnants</h2><br/> </div>
   
 <?php
-$base= '~/Oracle/Oracle.sq3';					//Nom du fichier sq3
+$base= 'Oracle.sq3';					//Nom du fichier sq3
 $table = 'oracle';						//Nom de la table
 // On se connecte à SQLite
 $pdo_options[PDO::ATTR_ERRMODE] = PDO::ERRMODE_EXCEPTION;    
