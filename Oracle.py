@@ -29,9 +29,9 @@
 #   - Ajuster la création de bdd aux systèmes non-UNIX
 #   - Ajouter des options de recherche
 
-VERSION = "1.0.5"
+VERSION = "1.0.7"
 
-import re, os, sys, socket, time, sqlite3
+import re, os, sys, socket, time, sqlite3, urllib
 
 
 
@@ -78,13 +78,13 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
                            #                                        Afin d'éviter de prendre la ponctuation
                            #                                        Du message dans l'URL
                        "(?i)PRIVMSG .*? :!delete( (https?|ftp)://[a-z0-9\\-.@:]+\\.[a-z]{2,3}([.,;:]*[a-z0-9\\-_?'/\\\\+&%$#=~])*)?":self.delete,
-                       "(?i)PRIVMSG .*? :!\\+ ?([a-z0-9_\\-éèêïàôâîç]{3,30} ?)+$":self.tagadd,
+                       "(?i)PRIVMSG .*? :!\\+ ?([a-z0-9_\\-éèêïàôâîç]+ ?)+$":self.tagadd,
                            # "\+[a-z0-9]+" Un + suivi d'au moins 1 caractère alphnumérique
                            # " ?" Suivi d'un espace ou pas
                            # "+" Le tout répété au moins une fois
                            #    "+tag01", "+234 +tag2" et "+tag1+tag2" sont donc des expressions valides
-                       "(?i)PRIVMSG .*? :!-( ?[a-z0-9_\\-éèêïàôâîç]{1,30})+$":self.tagdel,
-                       "(?i)PRIVMSG .*? :!search( [a-z0-9_\\-éèêïàôâîç]{2,30})+$":self.search,
+                       "(?i)PRIVMSG .*? :!-( ?[a-z0-9_\\-éèêïàôâîç]+)+$":self.tagdel,
+                       "(?i)PRIVMSG .*? :!search( [a-z0-9_\\-éèêïàôâîç]+)+$":self.search,
                            # " [a-z0-9]+" Un espace suivi d'au moins un caractère alphanumérique
                            # "+" Répété au moins une fois
                        " :End of /MOTD command\\.":self.join,
@@ -153,6 +153,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
     def bye(self, msg, match):
         """Quits current channel"""
         target = self.gettarget(msg)
+##        self.sendTo(target, "TA GUEULE !")
         if target.lower() in map(str.lower, self.chan):
             self.sendToServ("PART %s :All your link are belong to us."%target)
             del self.lasturl[target]
@@ -190,10 +191,12 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
         if self.lasturl.has_key(chan):
             self.db.execute("SELECT keywords FROM %s WHERE link='%s'"%(self.name,
                                                                        self.lasturl[chan]))
-            self.db.execute("UPDATE %s SET keywords='%s' WHERE link='%s'"%(self.name,
-                                                                           "%s%s,"%(self.db.fetchall()[0][0].replace(",,",","),
-                                                                                    ','.join(re.findall("[a-zA-Z0-9_\\-éèêïàôâîç]{3,30}",
-                                                                                                        msg[msg.find(" :"):]))),
+            tags = []
+            for tag in self.db.fetchall()[0][0].split(",") + re.findall("[a-zA-Z0-9_\\-éèêïàôâîç]{3,30}", msg[msg.find(" :"):]):
+                if tag.lower() not in map(str.lower, tags) and tag != "":
+                    tags.append(tag)
+            self.db.execute("UPDATE %s SET keywords='%s,' WHERE link='%s'"%(self.name,
+                                                                           ','.join(tags),
                                                                            self.lasturl[chan]))
             self.conn.commit()
 
@@ -206,9 +209,9 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
             tags = self.db.fetchall()[0][0].split(",")
             for deleted in re.findall("[a-zA-Z0-9_\\-éèêïàôâîç]{1,30}", msg[msg.find(" :"):]):
                 for tag in tags:
-                    if tag.lower() == deleted.lower():
+                    if tag.lower() == deleted.lower() or tag == "":
                         tags.remove(tag)
-            self.db.execute("UPDATE %s SET keywords='%s' WHERE link='%s'"%(self.name,
+            self.db.execute("UPDATE %s SET keywords='%s,' WHERE link='%s'"%(self.name,
                                                                            ','.join(tags),
                                                                            self.lasturl[chan]))
             self.conn.commit()
@@ -218,12 +221,23 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
         # Cherche "au moins un des mots"
         # Remplacer le "OR" par un "AND"
         # Pour chercher "tous les mots"
-        self.db.execute("SELECT link FROM %s WHERE keywords LIKE '%%%s%%'"%(self.name,
-                                                                            "%%' OR keywords LIKE '%%".join(re.findall("[a-zA-Z0-9_\\-éèêïàôâî]{2,30}",
-                                                                                                                       msg[msg.find(" :"):]))))
+        self.db.execute("SELECT link, keywords FROM %s WHERE keywords LIKE '%%%s%%'"%(self.name,
+                                                                                      "%%' OR keywords LIKE '%%".join(re.findall("[a-zA-Z0-9_\\-éèêïàôâî]{2,30}",
+                                                                                                                                 msg[msg.find(" :"):]))))
         fetch = self.db.fetchall()
         if len(fetch):
-            self.sendTo(self.gettarget(msg), "\n".join(zip(*fetch)[0]))
+            for result in fetch:
+                self.sendTo(self.gettarget(msg), "%s (%s)"%(result[0],
+                                                            result[1][:-1].replace(",", ", ")))
+        else:
+            query = urllib.urlencode({'q' : msg[msg.find("!search ")+8:]})
+            url = 'http://ajax.googleapis.com/ajax/services/search/images?v=1.0&%s'% (query)
+            search_results = urllib.urlopen(url)
+            result = search_results.read()
+            search_results.close()
+            result = result[result.find("\"url\":\"")+7:]
+            result = result[:result.find("\",\"")]
+            self.sendTo(self.gettarget(msg), "%s\n"%result)
 
     def delete(self, msg, match):
         """Deletes a previously added url"""
