@@ -29,7 +29,7 @@
 #   - Ajuster la création de bdd aux systèmes non-UNIX
 #   - Ajouter des options de recherche
 
-VERSION = "1.0.9"
+VERSION = "1.1.0"
 
 import re, os, sys, socket, time, sqlite3, urllib
 
@@ -85,6 +85,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
                            #    "+tag01", "+234 +tag2" et "+tag1+tag2" sont donc des expressions valides
                        "(?i)PRIVMSG .*? :!-.*$":self.tagdel,
                        "(?i)PRIVMSG .*? :!search .*$":self.search,
+                       "(?i)PRIVMSG .*? :!last$":self.last,
                            # " [a-z0-9]+" Un espace suivi d'au moins un caractère alphanumérique
                            # "+" Répété au moins une fois
                        " :End of /MOTD command\\.":self.join,
@@ -191,13 +192,23 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
         if self.lasturl.has_key(chan):
             self.db.execute("SELECT keywords FROM %s WHERE link='%s'"%(self.name,
                                                                        self.lasturl[chan]))
-            tags = []
-            for tag in self.db.fetchall()[0][0].split(",") + re.findall("[a-zA-Z0-9_\\-éèêïàôâîç]{3,30}", msg[msg.find(" :"):]):
-                if tag.lower() not in map(str.lower, tags) and tag != "":
-                    tags.append(tag)
-            self.db.execute("UPDATE %s SET keywords='%s,' WHERE link='%s'"%(self.name,
-                                                                           ','.join(tags),
-                                                                           self.lasturl[chan]))
+            fetch = self.db.fetchall()
+            newtags = re.findall("[a-zA-Z0-9_\\-éèêïàôâîç]{3,30}", msg[msg.find(" :"):])
+            if len(fetch):
+                tags = []
+                for tag in fetch[0][0].split(",") + newtags:
+                    if tag.lower() not in map(str.lower, tags) and tag != "":
+                        tags.append(tag)
+                self.db.execute("UPDATE %s SET keywords='%s,' WHERE link='%s'"%(self.name,
+                                                                               ','.join(tags),
+                                                                               self.lasturl[chan]))
+            else:
+                self.db.execute("INSERT INTO %s VALUES (NULL,'%s','%s', '%s', '%s,', %i);"%(self.name,               # Nom du bot/de la table
+                                                                                            chan,                    # Chan
+                                                                                            msg[1:msg.find("!")],    # Pseudo du posteur
+                                                                                            self.lasturl[chan],      # URL
+                                                                                            ','.join(newtags),       # Tags
+                                                                                            int(time.time())))       # Timestamp
             self.conn.commit()
 
     def tagdel(self, msg, match):
@@ -236,8 +247,15 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
             search_results.close()
             url = url[url.find("\"url\":\"")+7:]
             url = url[:url.find("\",\"")]
-            self.sendTo(chan, "%s\n"%url)
+            self.sendTo(chan, "%s"%url)
         self.lasturl[chan] = url
+
+    def last(self, msg, match):
+        """Searches for an URL with the given tags"""
+        chan = self.gettarget(msg)
+        url = self.lasturl[chan]
+        if url != "":
+            self.sendTo(chan, url)
 
     def delete(self, msg, match):
         """Deletes a previously added url"""
@@ -262,6 +280,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
 !+ tag1 tag2 : Adds tags to the last link.
 !- tag1 tag2 : Removes tags from the last link.
 !search tag1 tag2 : Searches links linked to tag1 AND tag2.
+!last : Displays last link.
 !goto #foo : Goes to #foo.
 !quit : Leaves current channel.""")
         
