@@ -29,7 +29,7 @@
 #   - Ajuster la création de bdd aux systèmes non-UNIX
 #   - Ajouter des options de recherche
 
-VERSION = "1.1.0"
+VERSION = "1.1.1"
 
 import re, os, sys, socket, time, sqlite3, urllib
 
@@ -230,7 +230,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
     def search(self, msg, match):
         """Searches for an URL with the given tags"""
         chan = self.gettarget(msg)
-        self.db.execute("SELECT link, keywords FROM %s WHERE keywords LIKE '%%%s%%'"%(self.name,
+        self.db.execute("SELECT link, keywords FROM '%s' WHERE keywords LIKE '%%%s%%'"%(self.name,
                                                                                       "%%' AND keywords LIKE '%%".join(re.findall("[a-zA-Z0-9_\\-éèêïàôâîç]{2,30}",
                                                                                                                                  msg[msg.find(" :!search")+9:]))))
         fetch = self.db.fetchall()
@@ -255,7 +255,12 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
         chan = self.gettarget(msg)
         url = self.lasturl[chan]
         if url != "":
-            self.sendTo(chan, url)
+            self.db.execute("SELECT keywords FROM '%s' WHERE link='%s'"%(self.name,
+                                                                         url))
+            fetch = self.db.fetchall()
+            if len(fetch):
+                keywords = " (" + fetch[0][0][:-1].replace(",", ", ")) + ")"
+            self.sendTo(chan, "%s%s"%(url, keywords)
 
     def delete(self, msg, match):
         """Deletes a previously added url"""
