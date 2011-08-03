@@ -49,7 +49,7 @@ $a = 1;
 
 // Ajout de tags
 
-if (isset($_POST['tags']) AND isset($_POST['id']))
+if (isset($_POST['tags']) AND isset($_POST['id']) AND isset($_POST['classement']) )
 {
 	$reponse = $bdd->query("SELECT keywords FROM '".$table."' WHERE id='".$_POST['id']."'");
 	$donnees = $reponse->fetch();

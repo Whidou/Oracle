@@ -14,6 +14,8 @@
 
 
 <?php
+if (isset($_POST['recherche']))
+{
 if ($_POST['recherche'] == ''){
 
 } 
@@ -78,7 +80,7 @@ else
 	}
 
 }
-
+}
     ?>
 	
 
