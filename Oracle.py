@@ -29,7 +29,7 @@
 #   - Ajuster la création de bdd aux systèmes non-UNIX
 #   - Ajouter des options de recherche
 
-VERSION = "1.1.1"
+VERSION = "1.1.2"
 
 import re, os, sys, socket, time, sqlite3, urllib
 
@@ -259,7 +259,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
                                                                          url))
             fetch = self.db.fetchall()
             if len(fetch):
-                keywords = " (" + fetch[0][0][:-1].replace(",", ", ")) + ")"
+                keywords = " (" + fetch[0][0][:-1].replace(",", ", ") + ")"
             self.sendTo(chan, "%s%s"%(url, keywords)
 
     def delete(self, msg, match):
