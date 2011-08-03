@@ -260,7 +260,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
             fetch = self.db.fetchall()
             if len(fetch):
                 keywords = " (" + fetch[0][0][:-1].replace(",", ", ") + ")"
-            self.sendTo(chan, "%s%s"%(url, keywords)
+            self.sendTo(chan, "%s%s"%(url, keywords))
 
     def delete(self, msg, match):
         """Deletes a previously added url"""
