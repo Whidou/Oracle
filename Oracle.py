@@ -29,7 +29,7 @@
 #   - Ajuster la création de bdd aux systèmes non-UNIX
 #   - Ajouter des options de recherche
 
-VERSION = "1.1.2"
+VERSION = "1.1.3"
 
 import re, os, sys, socket, time, sqlite3, urllib
 
@@ -154,7 +154,6 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
     def bye(self, msg, match):
         """Quits current channel"""
         target = self.gettarget(msg)
-##        self.sendTo(target, "TA GUEULE !")
         if target.lower() in map(str.lower, self.chan):
             self.sendToServ("PART %s :All your link are belong to us."%target)
             del self.lasturl[target]
@@ -184,7 +183,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
                 #Ligne envoyée au chan si le lien est déjà présent.
                 self.sendTo(chan,fetch[0][1].replace(",", ", ")[:-2])
             self.lasturl[chan] = url # Stockage de l'url dans la "case" correspondant au chan
-            self.tagadd(msg[:match[0]]+msg[match[1]:], (0, 0))
+            self.tagadd(msg[match[1]:], (0, 0))
 
     def tagadd(self, msg, match):
         """Adds tag(s) to last URL"""
