@@ -84,22 +84,23 @@ $reponse = $bdd->query("SELECT * FROM '".$table."'".$search." ORDER BY ".$classe
 // Affichage
 while ($donnees = $reponse->fetch())
 {
-	if (strlen($donnees['link']) <= $max_link_length)	// Si le lien n'est pas trop long
+	$raw_link = htmlspecialchars($donnees['link']);
+	if (strlen($raw_link) <= $max_link_length)	// Si le lien n'est pas trop long
 	{ 
-		$link = $donnees['link'];
+		$link = $raw_link;
 	}
 	else												// Si le lien est trop long
 	{
 		$fin = substr($donnees['link'], -4); 						// Les 4 derniers
 		$debut = substr($donnees['link'], 0, $max_link_length-7);	// Les n-7 premiers
-		$link = $debut.'...'.$fin;
+		$link = htmlspecialchars($debut.'...'.$fin);
 	}
 	echo '
 			<tr id="row'.$donnees['id'].'">
 				<td>'.$donnees['id'].'</td>
 				<td>'.$donnees['auteur'].'</td>
 				<td>'.$donnees['chan_orig'].' </td>
-				<td><a href="'.$donnees['link'].'">'.$link.'</a></td>
+				<td><a href="'.$raw_link.'">'.$link.'</a></td>
 				<td>'.strtr($donnees['keywords'], array("," => ", ")).'</td>
 				<td>'.date('d/m/Y H\hi', $donnees['date']).'</td>
 				<td>
