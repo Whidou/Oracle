@@ -15,7 +15,8 @@ if (isset($_POST['tags']) AND isset($_POST['id']))
 	$reponse = $bdd->query("SELECT keywords FROM '".$table."' WHERE id='".$id."'");
 	$donnees = $reponse->fetch();
 
-	$bdd->exec("UPDATE ".$table." SET keywords='".$donnees['keywords'].strtr($tags,  array(" " => ",")).",' WHERE id='".$id."'");
+	$convert = array(" " => ",");
+	$bdd->exec("UPDATE ".$table." SET keywords='".$donnees['keywords'].strtr($tags,  $convert).",' WHERE id='".$id."'");
 } ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" >
@@ -68,7 +69,8 @@ if (isset($_POST['recherche']))
 {
 	$recherche=  sqlite_real_escape_string(htmlspecialchars($_POST['recherche']));
 	$champ = sqlite_real_escape_string(htmlspecialchars($_POST['champ']));
-	$recherche = " WHERE ".$champ." LIKE '%".strtr($tags,  array(" " => "OR ".$champ." LIKE '%"))."%'";
+	$convert = array(" " => "OR ".$champ." LIKE '%");
+	$recherche = " WHERE ".$champ." LIKE '%".strtr($tags,  $convert)."%'";
 }
 else
 {
@@ -101,13 +103,14 @@ while ($donnees = $reponse->fetch())
 		$debut = substr($donnees['link'], 0, $max_link_length-7);	// Les n-7 premiers
 		$link = $debut.'...'.$fin;
 	}
+	$convert = array("," => ", ");
 	echo '
 			<tr>
 				<td>'.$donnees['id'].'</td>
 				<td>'.$donnees['auteur'].'</td>
 				<td>'.$donnees['chan_orig'].' </td>
 				<td><a href="'.$donnees['link'].'">'.$link'</a></td>
-				<td>'.strtr($donnees['keywords'], array("," => ", ")).'</td>
+				<td>'.strtr($donnees['keywords'], $convert).'</td>
 				<td>'.date('d/m/Y H\hi', $donnees['date']).'</td>
 				<td>
 					<form method="post" action="index.php">
