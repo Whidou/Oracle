@@ -64,7 +64,7 @@ if (isset($_POST['tags']) AND isset($_POST['id']))
 			</tr>
 <?php
 //Recherche
-if (isset($_POST['recherche'])
+if (isset($_POST['recherche']))
 {
 	$recherche=  sqlite_real_escape_string(htmlspecialchars($_POST['recherche']));
 	$champ = sqlite_real_escape_string(htmlspecialchars($_POST['champ']));
