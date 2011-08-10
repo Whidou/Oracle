@@ -40,6 +40,7 @@ margin-left: auto;
 margin-right: auto; 
 width: 80%;
 text-align: center;
+color: #FFFFFF;
 }
 
 #formulaire
@@ -61,17 +62,30 @@ text-decoration: none;
 
 a:visited
 {
-color: #EEEEEF;
+color: #DDEEFF;
 }
 
-table, tr
+table
 {
 border-collapse: collapse;
 margin: auto;
 margin-bottom: 30px;
 min-width: 100%;
 }
-td, th
+
+tr:hover
+{
+background-color: #086CA2;
+color: #FFFFFF;
+}
+
+th
+{
+background-color: #086CA2;
+color: #FFFFFF;
+}
+
+td
 {
 text-align: center;
 border: 1px solid black;
