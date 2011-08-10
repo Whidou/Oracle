@@ -29,7 +29,7 @@
 #   - Ajuster la création de bdd aux systèmes non-UNIX
 #   - Ajouter des options de recherche
 
-VERSION = "1.1.5"
+VERSION = "1.1.6"
 
 import re, os, sys, socket, time, sqlite3, urllib
 
@@ -217,8 +217,8 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
             self.db.execute("SELECT keywords FROM %s WHERE link='%s'"%(self.name,
                                                                        self.lasturl[chan]))
             tags = self.db.fetchall()[0][0].split(",")
-            for deleted in re.findall("[a-zA-Z0-9_\\-éèêïàôâîç]{1,30}", msg[msg.find(" :"):])[::-1]:
-                for tag in tags:
+            for deleted in re.findall("[a-zA-Z0-9_\\-éèêïàôâîç]{1,30}", msg[msg.find(" :"):]):
+                for tag in tags[::-1]:
                     if tag.lower() == deleted.lower() or tag == "":
                         tags.remove(tag)
             self.db.execute("UPDATE %s SET keywords='%s,' WHERE link='%s'"%(self.name,
