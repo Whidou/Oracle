@@ -95,7 +95,7 @@ while ($donnees = $reponse->fetch())
 		$link = $debut.'...'.$fin;
 	}
 	echo '
-			<tr>
+			<tr id="row'.$donnees['id'].'">
 				<td>'.$donnees['id'].'</td>
 				<td>'.$donnees['auteur'].'</td>
 				<td>'.$donnees['chan_orig'].' </td>
@@ -103,7 +103,7 @@ while ($donnees = $reponse->fetch())
 				<td>'.strtr($donnees['keywords'], array("," => ", ")).'</td>
 				<td>'.date('d/m/Y H\hi', $donnees['date']).'</td>
 				<td>
-					<form method="post" action="index.php">
+					<form method="post" action="index.php#row'.$donnees['id'].'">
 						<input type="hidden" name="id" value="'.$donnees['id'].'" />
 						<input type="text" name="tags" />
 						<input type="submit" value="Ajouter"/>
