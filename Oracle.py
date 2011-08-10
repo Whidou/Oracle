@@ -29,7 +29,7 @@
 #   - Ajuster la création de bdd aux systèmes non-UNIX
 #   - Ajouter des options de recherche
 
-VERSION = "1.1.6"
+VERSION = "1.1.7"
 
 import re, os, sys, socket, time, sqlite3, urllib
 
@@ -183,7 +183,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
                 #Ligne envoyée au chan si le lien est déjà présent.
                 self.sendTo(chan,fetch[0][1].replace(",", ", ")[:-2])
             self.lasturl[chan] = url # Stockage de l'url dans la "case" correspondant au chan
-            self.tagadd(" :%s"%(msg[match[1]:]), (0, 0))
+            self.tagadd("PRIVMSG %s :%s"%(chan, msg[match[1]:]), (0, 0))
 
     def tagadd(self, msg, match):
         """Adds tag(s) to last URL"""
