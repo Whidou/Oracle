@@ -85,6 +85,8 @@ else
 	$classement = 'id';
 }
 
+echo "SELECT * FROM '".$table."'".$recherche." ORDER BY '".$classement."' DESC LIMIT 0, ".$lines;
+
 //Requête
 $reponse = $bdd->query("SELECT * FROM '".$table."'".$recherche." ORDER BY '".$classement."' DESC LIMIT 0, ".$lines);
 
