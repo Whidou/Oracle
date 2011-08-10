@@ -56,22 +56,23 @@ color: #FFFFFF;
 
 a:hover
 {
-text-decoration:none;
+text-decoration: none;
 }
 
 a:visited
 {
-color: #AAAAAA;
+color: #EEEEEF;
 }
 
 table, tr
 {
-   border-collapse: collapse;
-   margin: auto;
-   margin-bottom: 30px;
-   min-width: 100%;
+border-collapse: collapse;
+margin: auto;
+margin-bottom: 30px;
+min-width: 100%;
 }
 td, th
 {
-   border: 1px solid black;
+text-align: center;
+border: 1px solid black;
 } 
