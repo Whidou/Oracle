@@ -15,9 +15,7 @@ if (isset($_POST['tags']) AND isset($_POST['id']))
 	$reponse = $bdd->query("SELECT keywords FROM ".$table." WHERE id='".$id."'");
 	$donnees = $reponse->fetch();
 
-	$bdd->beginTransaction();
 	$bdd->exec("UPDATE ".$table." SET keywords='".$donnees['keywords'].strtr($tags,  array(" " => ",")).",' WHERE id='".$id."'");
-	$bdd->commit();
 } ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" >
@@ -35,26 +33,19 @@ if (isset($_POST['tags']) AND isset($_POST['id']))
 			<p>Recherche :</p>
 			<input type="text" name="recherche" /><br/>
 			<p>Type :</p>
-			<input type="radio" name="champ" value="keywords" id="tags" checked="checked"/><label for="chan">Tags</label>
-			<input type="radio" name="champ" value="auteur" id="auteur" /> <label for="auteur">Auteur</label>
-			<input type="radio" name="champ" value="chan_orig" id="chan" /><label for="chan">Channel</label><br/>
-			<p>Classement :</p>
-			<input type="radio" name="classer" value="id" checked="checked"/> <label for="auteur">Date</label>
-			<input type="radio" name="classer" value="auteur"/> <label for="auteur">Auteur</label>
-			<input type="radio" name="classer" value="chan_orig"/> <label for="auteur">Channel</label>
-			<input type="submit" value="Rechercher" name="rechercher" />
+			<input type="radio" name="champ" value="keywords" id="r_tags" checked="checked" /><label for="r_tags">Tags</label>
+			<input type="radio" name="champ" value="auteur" id="r_auteur" /> <label for="r_auteur">Auteur</label>
+			<input type="radio" name="champ" value="chan_orig" id="r_chan" /><label for="r_chan">Channel</label><br/>
+		</form>
+		<form method="post" action="index.php" id="classement">
+			<span>Classer par :</span>
+			<input type="radio" name="classer" value="id" id="date" /> <label for="date">Date</label>
+			<input type="radio" name="classer" value="auteur" id="auteur" /> <label for="auteur">Auteur</label>
+			<input type="radio" name="classer" value="chan_orig" id="chan" /> <label for="chan">Salon</label>
+			<input type="submit" value="Classer" />
 		</form>
 		<table>
-			<caption>Index des liens
-				<form method="post" action="index.php" id="classement">
-					<span>Classer par :</span>
-					<input type="radio" name="classer" value="id" id="date" /> <label for="date">Date</label>
-					<input type="radio" name="classer" value="auteur" id="auteur" /> <label for="auteur">Auteur</label>
-					<input type="radio" name="classer" value="chan_orig" id="chan" /> <label for="chan">Salon</label>
-					<input type="submit" value="Classer" />
-				</form>
-			</caption>
-
+			<caption>Index des liens</caption>
 			<tr>
 				<th>#</th>
 				<th>Auteur</th>
