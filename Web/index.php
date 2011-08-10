@@ -16,7 +16,7 @@ if (isset($_POST['tags']) AND isset($_POST['id']))
 	$donnees = $reponse->fetch();
 	
 	echo "SELECT keywords FROM ".$table." WHERE id='".$id."'";
-	echo "UPDATE ".$table." SET keywords='".$donnees['keywords'].strtr($tags,  array(" " => ",")).",' WHERE id='".$id."'"
+	echo "UPDATE ".$table." SET keywords='".$donnees['keywords'].strtr($tags,  array(" " => ",")).",' WHERE id='".$id."'";
 
 	$bdd->exec("UPDATE ".$table." SET keywords='".$donnees['keywords'].strtr($tags,  array(" " => ",")).",' WHERE id='".$id."'");
 } ?>
