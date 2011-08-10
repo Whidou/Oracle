@@ -29,7 +29,7 @@
 #   - Ajuster la création de bdd aux systèmes non-UNIX
 #   - Ajouter des options de recherche
 
-VERSION = "1.1.7"
+VERSION = "1.1.8"
 
 import re, os, sys, socket, time, sqlite3, urllib
 
@@ -189,26 +189,27 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
         """Adds tag(s) to last URL"""
         chan = self.gettarget(msg)
         if self.lasturl.has_key(chan):
-            self.db.execute("SELECT keywords FROM %s WHERE link='%s'"%(self.name,
-                                                                       self.lasturl[chan]))
-            fetch = self.db.fetchall()
             newtags = re.findall("[a-zA-Z0-9_\\-éèêïàôâîç]{3,30}", msg[msg.find(" :"):])
-            if len(fetch):
-                tags = []
-                for tag in fetch[0][0].split(",") + newtags:
-                    if tag.lower() not in map(str.lower, tags) and tag != "":
-                        tags.append(tag)
-                self.db.execute("UPDATE %s SET keywords='%s,' WHERE link='%s'"%(self.name,
-                                                                               ','.join(tags),
-                                                                               self.lasturl[chan]))
-            else:
-                self.db.execute("INSERT INTO %s VALUES (NULL,'%s','%s', '%s', '%s,', %i);"%(self.name,               # Nom du bot/de la table
-                                                                                            chan,                    # Chan
-                                                                                            msg[1:msg.find("!")],    # Pseudo du posteur
-                                                                                            self.lasturl[chan],      # URL
-                                                                                            ','.join(newtags),       # Tags
-                                                                                            int(time.time())))       # Timestamp
-            self.conn.commit()
+            if len(newtags):
+                self.db.execute("SELECT keywords FROM %s WHERE link='%s'"%(self.name,
+                                                                           self.lasturl[chan]))
+                fetch = self.db.fetchall()
+                if len(fetch):
+                    tags = []
+                    for tag in fetch[0][0].split(",") + newtags:
+                        if tag.lower() not in map(str.lower, tags) and tag != "":
+                            tags.append(tag)
+                    self.db.execute("UPDATE %s SET keywords='%s,' WHERE link='%s'"%(self.name,
+                                                                                   ','.join(tags),
+                                                                                   self.lasturl[chan]))
+                else:
+                    self.db.execute("INSERT INTO %s VALUES (NULL,'%s','%s', '%s', '%s,', %i);"%(self.name,               # Nom du bot/de la table
+                                                                                                chan,                    # Chan
+                                                                                                msg[1:msg.find("!")],    # Pseudo du posteur
+                                                                                                self.lasturl[chan],      # URL
+                                                                                                ','.join(newtags),       # Tags
+                                                                                                int(time.time())))       # Timestamp
+                self.conn.commit()
 
     def tagdel(self, msg, match):
         """Deletes tag(s) from last URL"""
@@ -279,7 +280,6 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
         """Displays a minimal manual"""
         self.sendTo(self.gettarget(msg),"""!help : Displays this message.
 !version : Displays Oracle's version.
-!delete : Deletes last URL.
 !delete url : Deletes URL.
 !+ tag1 tag2 : Adds tags to the last link.
 !- tag1 tag2 : Removes tags from the last link.
@@ -292,8 +292,8 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
         """Displays version data"""
         self.sendTo(self.gettarget(msg),"""Oracle : Oracle Recherche, Accepte et Consulte les Liens Etonnants
 v%s
-Functional version \o/.
-http://hgpub.druil.net/Oracle/"""%VERSION)
+Website : http://trac.druil.net/Oracle/
+Interface HTTP : http://oracle.druil.net/"""%VERSION)
 
 
 
