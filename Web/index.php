@@ -12,8 +12,11 @@ if (isset($_POST['tags']) AND isset($_POST['id']))
 	$tags = sqlite_escape_string(htmlspecialchars($_POST['tags']));
 	$id = sqlite_escape_string(htmlspecialchars($_POST['id']));
 	
-	$reponse = $bdd->query("SELECT keywords FROM '".$table."' WHERE id='".$id."'");
+	$reponse = $bdd->query("SELECT keywords FROM ".$table." WHERE id='".$id."'");
 	$donnees = $reponse->fetch();
+	
+	echo "SELECT keywords FROM ".$table." WHERE id='".$id."'";
+	echo "UPDATE ".$table." SET keywords='".$donnees['keywords'].strtr($tags,  array(" " => ",")).",' WHERE id='".$id."'"
 
 	$bdd->exec("UPDATE ".$table." SET keywords='".$donnees['keywords'].strtr($tags,  array(" " => ",")).",' WHERE id='".$id."'");
 } ?>
@@ -72,7 +75,7 @@ if (isset($_POST['recherche']))
 }
 else
 {
-	$recherche = "";
+	$search = "";
 }
 
 // Classement
@@ -84,8 +87,6 @@ else
 {
 	$classement = 'id';
 }
-
-echo "SELECT * FROM '".$table."'".$recherche." ORDER BY '".$classement."' DESC LIMIT 0, ".$lines;
 
 //Requête
 $reponse = $bdd->query("SELECT * FROM '".$table."'".$search." ORDER BY ".$classement." DESC LIMIT 0, ".$lines);
