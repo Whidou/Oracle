@@ -14,10 +14,10 @@ if (isset($_POST['tags']) AND isset($_POST['id']))
 	
 	$reponse = $bdd->query("SELECT keywords FROM ".$table." WHERE id='".$id."'");
 	$donnees = $reponse->fetch();
-	
-	echo "UPDATE ".$table." SET keywords='".$donnees['keywords'].strtr($tags,  array(" " => ",")).",' WHERE id='".$id."'";
 
+	$bdd->beginTransaction();
 	$bdd->exec("UPDATE ".$table." SET keywords='".$donnees['keywords'].strtr($tags,  array(" " => ",")).",' WHERE id='".$id."'");
+	$bdd->commit();
 } ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" >
