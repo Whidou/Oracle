@@ -68,7 +68,7 @@ if (isset($_POST['recherche']))
 {
 	$recherche=  sqlite_escape_string(htmlspecialchars($_POST['recherche']));
 	$champ = sqlite_escape_string(htmlspecialchars($_POST['champ']));
-	$recherche = " WHERE ".$champ." LIKE '%".strtr($tags,  array(" " => "OR ".$champ." LIKE '%"))."%'";
+	$search = " WHERE ".$champ." LIKE '%".strtr($recherche,  array(" " => "OR ".$champ." LIKE '%"))."%'";
 }
 else
 {
@@ -88,7 +88,7 @@ else
 echo "SELECT * FROM '".$table."'".$recherche." ORDER BY '".$classement."' DESC LIMIT 0, ".$lines;
 
 //Requête
-$reponse = $bdd->query("SELECT * FROM '".$table."'".$recherche." ORDER BY '".$classement."' DESC LIMIT 0, ".$lines);
+$reponse = $bdd->query("SELECT * FROM '".$table."'".$search." ORDER BY ".$classement." DESC LIMIT 0, ".$lines);
 
 // Affichage
 while ($donnees = $reponse->fetch())
