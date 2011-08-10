@@ -115,7 +115,7 @@ $reponse->closeCursor(); ?>
 		</table>
 	</div>
 	<div id="footer">
-		<p>Oracle HTTP Interface <a href="http://hgpub.druil.net/Oracle/">http://hgpub.druil.net/Oracle/</a></p>
+		<p><a href="http://hgpub.druil.net/Oracle/">Oracle</a> HTTP Interface</p>
 	</div>
 </body>
 </html>

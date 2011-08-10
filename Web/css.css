@@ -51,12 +51,17 @@ padding: 10px;
 
 a
 {
-color: #132A74;
+color: #FFFFFF;
+}
+
+a:hover
+{
+text-decoration:none;
 }
 
 a:visited
 {
-color: #132A74;
+color: #AAAAAA;
 }
 
 table, tr
