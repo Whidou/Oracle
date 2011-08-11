@@ -52,11 +52,10 @@ if (isset($_POST['tags']) AND isset($_POST['id']))
 {
 	$text_tags = sqlite_escape_string(htmlspecialchars($_POST['tags']));
 	$id = sqlite_escape_string(htmlspecialchars($_POST['id']));
-	
+
 	$reponse = $bdd->query("SELECT keywords FROM ".$table." WHERE id='".$id."'");
 	$donnees = $reponse->fetch();
-	
-	$tags = array();
+
 	preg_match_all("([a-zA-Z0-9]{3,30})", $text_tags, $tags);
 
 	$bdd->exec("UPDATE ".$table." SET keywords='".$donnees['keywords'].implode(",", $tags).",' WHERE id='".$id."'");
