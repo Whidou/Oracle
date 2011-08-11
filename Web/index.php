@@ -52,7 +52,7 @@ if (isset($_POST['tags']) AND isset($_POST['id']))
 {
 	$id = sqlite_escape_string($_POST['id']);
 
-	preg_match_all('([a-z0-9_\-יטךןאפגמחû]{3,30})iu', $_POST['tags'], $tags);
+	preg_match_all('([a-z0-9_\-\xc0\xa1\xa1\xa1\xa1-\x01\x7e\xa1\xa1\xa1]{3,30})iu', $_POST['tags'], $tags);
 	$tags = implode(",", $tags[0]);
 	
 	if ($tags != '')
