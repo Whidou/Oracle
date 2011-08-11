@@ -11,23 +11,23 @@
 			<h2> Oracle Recherche, Accepte et Consulte les Liens Etonnants</h2>
 		</div>
 		<form method="get" action="#" id="formulaire">
-			<span id="recherche">
+			<div id="recherche">
 				Recherche :
 				<input type="text" name="recherche" />
-			</span>
-			<span id="type">
+			</div>
+			<div id="type">
 				Type :
 				<input type="radio" name="champ" value="keywords" id="r_tags" checked="checked" /><label for="r_tags">Tags</label>
 				<input type="radio" name="champ" value="auteur" id="r_auteur" /> <label for="r_auteur">Auteur</label>
 				<input type="radio" name="champ" value="chan_orig" id="r_chan" /><label for="r_chan">Salon</label>
-			</span>
-			<span id="tri">
+			</div>
+			<div id="tri">
 				Trier par :
 				<input type="radio" name="sort" value="id" id="date" /> <label for="date">Date</label>
 				<input type="radio" name="sort" value="auteur" id="auteur" /> <label for="auteur">Auteur</label>
 				<input type="radio" name="sort" value="chan_orig" id="chan" /> <label for="chan">Salon</label>
 				<input type="submit" value="Go !" />
-			</span>
+			</div>
 		</form>
 		<table>
 			<tr>
