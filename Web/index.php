@@ -11,7 +11,7 @@
 		<form method="get" action="#" id="outils">
 			<div id="recherche">
 				Recherche<br />
-				<input type="text" name="recherche" id="champ_recherche" />
+				<input type="text" name="recherche" id="champ" />
 			</div>
 			<div id="type">
 				Type<br />
@@ -109,7 +109,7 @@ while ($donnees = $reponse->fetch())
 				<td>
 					<form method="post" action="index.php#row'.$donnees['id'].'">
 						<input type="hidden" name="id" value="'.$donnees['id'].'" />
-						<input type="text" name="tags" />
+						<input type="text" name="tags" id="champ" />
 						<input type="submit" value="Ajouter" id="bouton" />
 					</form>
 				</td>
