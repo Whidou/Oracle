@@ -53,19 +53,22 @@ else
 		<div id="float">
 			<h2> Oracle Recherche, Accepte et Consulte les Liens Etonnants</h2>
 		</div>
-		<form method="get" action="?sort=<?echo $classement;?>" id="formulaire">
+		<form method="get" action="#" id="formulaire">
 			<p>Recherche :</p>
 			<input type="text" name="recherche" /><br/>
 			<p>Type :</p>
 			<input type="radio" name="champ" value="keywords" id="r_tags" checked="checked" /><label for="r_tags">Tags</label>
 			<input type="radio" name="champ" value="auteur" id="r_auteur" /> <label for="r_auteur">Auteur</label>
-			<input type="radio" name="champ" value="chan_orig" id="r_chan" /><label for="r_chan">Salon</label><br/>
+			<input type="radio" name="champ" value="chan_orig" id="r_chan" /><label for="r_chan">Salon</label>
+			<input type="hidden" name="sort" value="<?echo $classement;?>" />
 		</form>
-		<form method="get" action="?recherche=<?echo $recherche;?>&champ=<?echo $champ;?>" id="classement">
+		<form method="get" action="#" id="classement">
 			<span>Trier par :</span>
 			<input type="radio" name="sort" value="id" id="date" /> <label for="date">Date</label>
 			<input type="radio" name="sort" value="auteur" id="auteur" /> <label for="auteur">Auteur</label>
 			<input type="radio" name="sort" value="chan_orig" id="chan" /> <label for="chan">Salon</label>
+			<input type="hidden" name="recherche" value="<?echo $recherche;?>" />
+			<input type="hidden" name="champ" value="<?echo $champ;?>" />
 			<input type="submit" value="Trier" />
 		</form>
 		<table>
