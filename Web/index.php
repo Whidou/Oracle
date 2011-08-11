@@ -60,7 +60,7 @@ if (isset($_POST['tags']) AND isset($_POST['id']))
 		$reponse = $bdd->query("SELECT keywords FROM ".$table." WHERE id='".$id."'");
 		$donnees = $reponse->fetch();
 	
-		$bdd->exec("UPDATE ".$table." SET keywords='".$donnees['keywords'].implode(",", $tags[0]).",' WHERE id='".$id."'");
+		$bdd->exec("UPDATE ".$table." SET keywords='".$donnees['keywords'].implode(",", $tags).",' WHERE id='".$id."'");
 	}
 }
 
@@ -79,7 +79,7 @@ else
 }
 
 // Classement
-if (isset($_GET['sort']) and $_GET['sort'] != "")
+if (isset($_GET['sort']) and $_GET['sort'] != '')
 {
 	$classement = sqlite_escape_string(htmlspecialchars($_GET['sort']));
 }
@@ -111,7 +111,7 @@ while ($donnees = $reponse->fetch())
 				<td>'.$donnees['auteur'].'</td>
 				<td>'.$donnees['chan_orig'].' </td>
 				<td><a href="'.$raw_link.'">'.$link.'</a></td>
-				<td>'.strtr(htmlspecialchars($donnees['keywords']), array("," => ", ")).'</td>
+				<td>'.htmlentities(strtr($donnees['keywords'], array("," => ", "))).'</td>
 				<td>'.date('d/m/Y H\hi', $donnees['date']).'</td>
 				<td>
 					<form method="post" action="?recherche='.$recherche.'&champ='.$champ.'&sort='.$classement.'#row'.$donnees['id'].'">
