@@ -26,20 +26,22 @@ height: 100%;
 background-color: #086CA2;
 color: #FFFFFF;
 border: 1px solid #FFFFFF;
-margin: 1px;
 padding: auto;
 }
 
 .bouton:hover
 {
-background-color: #64AAD0;
+background-color: #DDEEFF;
 color: #000000;
 border: 1px solid #000000;
 }
-		
+
 .champ
 {
 width: 100%;
+margin: 0;
+padding: 0;
+border: 0;
 }
 
 #corps

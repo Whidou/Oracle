@@ -24,7 +24,7 @@
 			</div>
 			<div id="tri">
 				Trier par<br />
-				<input type="radio" name="sort" value="id" id="date" /> <label for="date">Date</label>
+				<input type="radio" name="sort" value="id" id="date" checked="checked" /> <label for="date">Date</label>
 				<input type="radio" name="sort" value="auteur" id="auteur" /> <label for="auteur">Auteur</label>
 				<input type="radio" name="sort" value="chan_orig" id="chan" /> <label for="chan">Salon</label>
 			</div>
