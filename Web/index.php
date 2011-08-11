@@ -1,3 +1,40 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" >
+<head>
+	<title>Oracle - interface de recherche</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<link rel="stylesheet" media="screen" type="text/css" title="Oracle" href="css.css" />
+</head>
+<body>
+	<div id="corps">
+		<div id="float">
+			<h2> Oracle Recherche, Accepte et Consulte les Liens Etonnants</h2>
+		</div>
+		<form method="get" action="#" id="formulaire">
+			<p>Recherche :</p>
+			<input type="text" name="recherche" /><br/>
+			<p>Type :</p>
+			<input type="radio" name="champ" value="keywords" id="r_tags" checked="checked" /><label for="r_tags">Tags</label>
+			<input type="radio" name="champ" value="auteur" id="r_auteur" /> <label for="r_auteur">Auteur</label>
+			<input type="radio" name="champ" value="chan_orig" id="r_chan" /><label for="r_chan">Channel</label><br/>
+		</form>
+		<form method="get" action="#" id="classement">
+			<span>Trier par :</span>
+			<input type="radio" name="sort" value="id" id="date" /> <label for="date">Date</label>
+			<input type="radio" name="sort" value="auteur" id="auteur" /> <label for="auteur">Auteur</label>
+			<input type="radio" name="sort" value="chan_orig" id="chan" /> <label for="chan">Salon</label>
+			<input type="submit" value="Trier" />
+		</form>
+		<table>
+			<tr>
+				<th>#</th>
+				<th>Auteur</th>
+				<th>Salon</th>
+				<th>Lien</th>
+				<th>Tags</th>
+				<th>Heure</th>
+				<th>Modifier les tags</th>
+			</tr>
 <?php
 // Configuration
 include('config.php');
@@ -16,51 +53,13 @@ if (isset($_POST['tags']) AND isset($_POST['id']))
 	$donnees = $reponse->fetch();
 
 	$bdd->exec("UPDATE ".$table." SET keywords='".$donnees['keywords'].strtr($tags,  array(" " => ",")).",' WHERE id='".$id."'");
-} ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" >
-<head>
-	<title>Oracle - interface de recherche</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<link rel="stylesheet" media="screen" type="text/css" title="Oracle" href="css.css" />
-</head>
-<body>
-	<div id="corps">
-		<div id="float">
-			<h2> Oracle Recherche, Accepte et Consulte les Liens Etonnants</h2>
-		</div>
-		<form method="post" action="index.php" id="formulaire">
-			<p>Recherche :</p>
-			<input type="text" name="recherche" /><br/>
-			<p>Type :</p>
-			<input type="radio" name="champ" value="keywords" id="r_tags" checked="checked" /><label for="r_tags">Tags</label>
-			<input type="radio" name="champ" value="auteur" id="r_auteur" /> <label for="r_auteur">Auteur</label>
-			<input type="radio" name="champ" value="chan_orig" id="r_chan" /><label for="r_chan">Channel</label><br/>
-		</form>
-		<form method="post" action="index.php" id="classement">
-			<span>Classer par :</span>
-			<input type="radio" name="classer" value="id" id="date" /> <label for="date">Date</label>
-			<input type="radio" name="classer" value="auteur" id="auteur" /> <label for="auteur">Auteur</label>
-			<input type="radio" name="classer" value="chan_orig" id="chan" /> <label for="chan">Salon</label>
-			<input type="submit" value="Classer" />
-		</form>
-		<table>
-			<caption>Index des liens</caption>
-			<tr>
-				<th>#</th>
-				<th>Auteur</th>
-				<th>Salon</th>
-				<th>Lien</th>
-				<th>Tags</th>
-				<th>Heure</th>
-				<th>Modifier les tags</th>
-			</tr>
-<?php
+}
+
 //Recherche
-if (isset($_POST['recherche']))
+if (isset($_GET['recherche']))
 {
-	$recherche=  sqlite_escape_string(htmlspecialchars($_POST['recherche']));
-	$champ = sqlite_escape_string(htmlspecialchars($_POST['champ']));
+	$recherche=  sqlite_escape_string(htmlspecialchars($_GET['recherche']));
+	$champ = sqlite_escape_string(htmlspecialchars($_GET['champ']));
 	$search = " WHERE ".$champ." LIKE '%".strtr($recherche,  array(" " => "OR ".$champ." LIKE '%"))."%'";
 }
 else
@@ -69,9 +68,9 @@ else
 }
 
 // Classement
-if (isset($_POST['classer']))
+if (isset($_GET['sort']))
 {
-	$classement = sqlite_escape_string(htmlspecialchars($_POST['classer']));
+	$classement = sqlite_escape_string(htmlspecialchars($_GET['sort']));
 }
 else
 {
@@ -116,7 +115,7 @@ $reponse->closeCursor(); ?>
 		</table>
 	</div>
 	<div id="footer">
-		<p><a href="http://hgpub.druil.net/Oracle/">Oracle</a> HTTP Interface</p>
+		<p><a href="http://trac.druil.net/Oracle/">Oracle</a> HTTP Interface</p>
 	</div>
 </body>
 </html>
