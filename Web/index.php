@@ -57,7 +57,7 @@ if (isset($_POST['tags']) AND isset($_POST['id']))
 	$donnees = $reponse->fetch();
 	
 	$tags = array();
-	preg_match_all("/[a-z0-9_\-éèêïàôâîç]{3,30}/i", $text_tags, $tags);
+	preg_match_all("([a-zA-Z0-9_\-éèêïàôâîç]{3,30})", $text_tags, $tags);
 
 	$bdd->exec("UPDATE ".$table." SET keywords='".$donnees['keywords'].implode(",", $tags).",' WHERE id='".$id."'");
 }
