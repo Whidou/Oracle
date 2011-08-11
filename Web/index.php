@@ -45,7 +45,7 @@ include('config.php');
 
 // Connexion à la BDD
 $pdo_options[PDO::ATTR_ERRMODE] = PDO::ERRMODE_EXCEPTION;
-$bdd = new PDO("sqlite:".$base);
+$bdd = new PDO('sqlite:'.$base);
 
 // Ajout de tags
 if (isset($_POST['tags']) AND isset($_POST['id']))
@@ -56,7 +56,10 @@ if (isset($_POST['tags']) AND isset($_POST['id']))
 	$reponse = $bdd->query("SELECT keywords FROM ".$table." WHERE id='".$id."'");
 	$donnees = $reponse->fetch();
 
-	preg_match_all("([a-zA-Z0-9]{3,30})", $text_tags, $tags);
+	echo $text_tags;
+	preg_match_all('([a-zA-Z0-9]{3,30})', $text_tags, $tags);
+	print_r($tags);
+	echo implode(",", $tags);
 
 	$bdd->exec("UPDATE ".$table." SET keywords='".$donnees['keywords'].implode(",", $tags).",' WHERE id='".$id."'");
 }
