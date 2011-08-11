@@ -56,12 +56,9 @@ if (isset($_POST['tags']) AND isset($_POST['id']))
 	$reponse = $bdd->query("SELECT keywords FROM ".$table." WHERE id='".$id."'");
 	$donnees = $reponse->fetch();
 
-	echo $text_tags;
 	preg_match_all('([a-zA-Z0-9]{3,30})', $text_tags, $tags);
-	print_r($tags);
-	echo implode(",", $tags);
 
-	$bdd->exec("UPDATE ".$table." SET keywords='".$donnees['keywords'].implode(",", $tags).",' WHERE id='".$id."'");
+	$bdd->exec("UPDATE ".$table." SET keywords='".$donnees['keywords'].implode(",", $tags[0]).",' WHERE id='".$id."'");
 }
 
 //Recherche
