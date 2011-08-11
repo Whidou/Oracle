@@ -61,7 +61,7 @@ if (isset($_POST['tags']) AND isset($_POST['id']))
 		$reponse = $bdd->query("SELECT keywords FROM ".$table." WHERE id='".$id."'");
 		$donnees = $reponse->fetch();
 	
-		$bdd->exec("UPDATE ".$table." SET keywords='".$donnees['keywords'].implode(",", $tags).",' WHERE id='".$id."'");
+		$bdd->exec("UPDATE ".$table." SET keywords='".$donnees['keywords'].$tags.",' WHERE id='".$id."'");
 	}
 }
 
