@@ -50,15 +50,18 @@ $bdd = new PDO('sqlite:'.$base);
 // Ajout de tags
 if (isset($_POST['tags']) AND isset($_POST['id']))
 {
-	$text_tags = sqlite_escape_string(htmlspecialchars($_POST['tags']));
-	$id = sqlite_escape_string(htmlspecialchars($_POST['id']));
+	$id = sqlite_escape_string($_POST['id']);
 
-	$reponse = $bdd->query("SELECT keywords FROM ".$table." WHERE id='".$id."'");
-	$donnees = $reponse->fetch();
-
-	preg_match_all('([a-zA-Z0-9_\-éèêïàôâîç]{3,30})', $text_tags, $tags);
-
-	$bdd->exec("UPDATE ".$table." SET keywords='".$donnees['keywords'].implode(",", $tags[0]).",' WHERE id='".$id."'");
+	preg_match_all('([a-z0-9_\-éèêïàôâîçû]{3,30})i', $_POST['tags'], $tags);
+	$tags = implode(",", $tags[0]);
+	
+	if ($tags != '')
+	{
+		$reponse = $bdd->query("SELECT keywords FROM ".$table." WHERE id='".$id."'");
+		$donnees = $reponse->fetch();
+	
+		$bdd->exec("UPDATE ".$table." SET keywords='".$donnees['keywords'].implode(",", $tags[0]).",' WHERE id='".$id."'");
+	}
 }
 
 //Recherche
@@ -108,7 +111,7 @@ while ($donnees = $reponse->fetch())
 				<td>'.$donnees['auteur'].'</td>
 				<td>'.$donnees['chan_orig'].' </td>
 				<td><a href="'.$raw_link.'">'.$link.'</a></td>
-				<td>'.strtr($donnees['keywords'], array("," => ", ")).'</td>
+				<td>'.strtr(htmlspecialchars($donnees['keywords']), array("," => ", ")).'</td>
 				<td>'.date('d/m/Y H\hi', $donnees['date']).'</td>
 				<td>
 					<form method="post" action="?recherche='.$recherche.'&champ='.$champ.'&sort='.$classement.'#row'.$donnees['id'].'">

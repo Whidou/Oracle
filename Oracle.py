@@ -189,7 +189,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
         """Adds tag(s) to last URL"""
         chan = self.gettarget(msg)
         if self.lasturl.has_key(chan):
-            newtags = re.findall("[a-zA-Z0-9_\\-éèêïàôâîç]{3,30}", msg[msg.find(" :"):])
+            newtags = re.findall("[a-zA-Z0-9_\\-éèêïàôâîçû]{3,30}", msg[msg.find(" :"):])
             if len(newtags):
                 self.db.execute("SELECT keywords FROM %s WHERE link='%s'"%(self.name,
                                                                            self.lasturl[chan]))
@@ -218,7 +218,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
             self.db.execute("SELECT keywords FROM %s WHERE link='%s'"%(self.name,
                                                                        self.lasturl[chan]))
             tags = self.db.fetchall()[0][0].split(",")
-            for deleted in re.findall("[a-zA-Z0-9_\\-éèêïàôâîç]{1,30}", msg[msg.find(" :"):]):
+            for deleted in re.findall("[a-zA-Z0-9_\\-éèêïàôâîçû]{1,30}", msg[msg.find(" :"):]):
                 for tag in tags[::-1]:
                     if tag.lower() == deleted.lower() or tag == "":
                         tags.remove(tag)
