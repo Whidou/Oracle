@@ -52,12 +52,11 @@ if (isset($_POST['tags']) AND isset($_POST['id']))
 {
 	$id = sqlite_escape_string($_POST['id']);
 
-	preg_match_all('([a-z0-9_\-éèêïàôâîçû]{3,30})i', $_POST['tags'], $tags);
+	preg_match_all('([a-z0-9_\-\u00C0-\u017E]{3,30})i', $_POST['tags'], $tags);
 	$tags = implode(",", $tags[0]);
 	
 	if ($tags != '')
 	{
-		echo $tags;
 		$reponse = $bdd->query("SELECT keywords FROM ".$table." WHERE id='".$id."'");
 		$donnees = $reponse->fetch();
 	
