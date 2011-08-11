@@ -63,7 +63,7 @@ if (isset($_POST['tags']) AND isset($_POST['id']))
 }
 
 //Recherche
-if (isset($_GET['recherche']) and isset($_GET['champ']))
+if (isset($_GET['recherche']) and isset($_GET['champ']) and $_GET['recherche'] != "" and $_GET['champ'] != "")
 {
 	$recherche = sqlite_escape_string(htmlspecialchars($_GET['recherche']));
 	$champ = sqlite_escape_string(htmlspecialchars($_GET['champ']));
@@ -77,7 +77,7 @@ else
 }
 
 // Classement
-if (isset($_GET['sort']))
+if (isset($_GET['sort']) and $_GET['sort'] != "")
 {
 	$classement = sqlite_escape_string(htmlspecialchars($_GET['sort']));
 }
