@@ -7,10 +7,10 @@
 </head>
 <body>
 	<div id="corps">
-		<div id="float">
+		<div id="titre">
 			<h2> Oracle Recherche, Accepte et Consulte les Liens Etonnants</h2>
 		</div>
-		<form method="get" action="#" id="formulaire">
+		<form method="get" action="#" id="outils">
 			<div id="recherche">
 				Recherche<br />
 				<input type="text" name="recherche" id="champ_recherche" />
