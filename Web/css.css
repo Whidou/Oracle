@@ -49,18 +49,24 @@ width: 100%
 {
 margin: 0;
 padding: 0;
+float: left;
+width: 33%;
 }
 
 #type
 {
 margin: 0 auto 0;
 padding: 0;
+float: left;
+width: 33%;
 }
 
 #tri
 {
 margin: 0;
 padding: 0;
+float: right;
+width: 33%;
 }
 
 a
