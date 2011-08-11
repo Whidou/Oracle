@@ -11,7 +11,7 @@
 		<form method="get" action="#" id="outils">
 			<div id="recherche">
 				Recherche<br />
-				<input type="text" name="recherche" id="champ" />
+				<input type="text" name="recherche" class="champ" />
 			</div>
 			<div id="type">
 				Type<br />
@@ -20,7 +20,7 @@
 				<input type="radio" name="champ" value="chan_orig" id="r_chan" /><label for="r_chan">Salon</label>
 			</div>
 			<div id="valider">
-				<input type="submit" value="Valider" id="bouton" />
+				<input type="submit" value="Valider" class="bouton" />
 			</div>
 			<div id="tri">
 				Trier par<br />
@@ -109,8 +109,8 @@ while ($donnees = $reponse->fetch())
 				<td>
 					<form method="post" action="index.php#row'.$donnees['id'].'">
 						<input type="hidden" name="id" value="'.$donnees['id'].'" />
-						<input type="text" name="tags" id="champ" />
-						<input type="submit" value="Ajouter" id="bouton" />
+						<input type="text" name="tags" class="champ" />
+						<input type="submit" value="Ajouter" class="bouton" />
 					</form>
 				</td>
 			</tr>';
