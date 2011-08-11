@@ -50,17 +50,20 @@ $bdd = new PDO("sqlite:".$base);
 // Ajout de tags
 if (isset($_POST['tags']) AND isset($_POST['id']))
 {
-	$tags = sqlite_escape_string(htmlspecialchars($_POST['tags']));
+	$text_tags = sqlite_escape_string(htmlspecialchars($_POST['tags']));
 	$id = sqlite_escape_string(htmlspecialchars($_POST['id']));
 	
 	$reponse = $bdd->query("SELECT keywords FROM ".$table." WHERE id='".$id."'");
 	$donnees = $reponse->fetch();
+	
+	$tags = array();
+	preg_match_all("[a-zA-Z0-9_\-éèêïàôâîç]{3,30}", $text_tags, $tags);
 
-	$bdd->exec("UPDATE ".$table." SET keywords='".$donnees['keywords'].strtr($tags,  array(" " => ",")).",' WHERE id='".$id."'");
+	$bdd->exec("UPDATE ".$table." SET keywords='".$donnees['keywords'].implode(",", $tags).",' WHERE id='".$id."'");
 }
 
 //Recherche
-if (isset($_GET['recherche']))
+if (isset($_GET['recherche']) and isset($_GET['champ']))
 {
 	$recherche = sqlite_escape_string(htmlspecialchars($_GET['recherche']));
 	$champ = sqlite_escape_string(htmlspecialchars($_GET['champ']));
@@ -68,6 +71,8 @@ if (isset($_GET['recherche']))
 }
 else
 {
+	$recherche = "";
+	$champ = "";
 	$search = "";
 }
 
@@ -94,8 +99,8 @@ while ($donnees = $reponse->fetch())
 	}
 	else												// Si le lien est trop long
 	{
-		$fin = substr($donnees['link'], -4); 						// Les 4 derniers
-		$debut = substr($donnees['link'], 0, $max_link_length-7);	// Les n-7 premiers
+		$fin = substr($donnees['link'], -10); 						// Les 10 derniers
+		$debut = substr($donnees['link'], 0, $max_link_length-13);	// Les n-13 premiers
 		$link = htmlspecialchars($debut.'...'.$fin);
 	}
 	echo '
@@ -107,7 +112,7 @@ while ($donnees = $reponse->fetch())
 				<td>'.strtr($donnees['keywords'], array("," => ", ")).'</td>
 				<td>'.date('d/m/Y H\hi', $donnees['date']).'</td>
 				<td>
-					<form method="post" action="index.php#row'.$donnees['id'].'">
+					<form method="post" action="?recherche='.$recherche.'&champ='.$champ.'&sort='.$classement.'#row'.$donnees['id'].'">
 						<input type="hidden" name="id" value="'.$donnees['id'].'" />
 						<input type="text" name="tags" class="champ" />
 						<input type="submit" value="Ajouter" class="bouton" />
@@ -115,7 +120,8 @@ while ($donnees = $reponse->fetch())
 				</td>
 			</tr>';
 }
-$reponse->closeCursor(); ?>
+$reponse->closeCursor();
+?>
 		</table>
 	</div>
 	<div id="footer">
