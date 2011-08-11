@@ -41,6 +41,23 @@ color: #FFFFFF;
 #formulaire
 {
 border: 1px solid black;
+float: right;
+width: 100%
+}
+
+#recherche
+{
+text-align: left;
+}
+
+#type
+{
+text-align: center;
+}
+
+#tri
+{
+text-align: right;
 }
 
 a
