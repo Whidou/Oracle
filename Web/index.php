@@ -56,13 +56,13 @@ if (isset($_POST['tags']) AND isset($_POST['id']))
 	$reponse = $bdd->query("SELECT keywords FROM ".$table." WHERE id='".$id."'");
 	$donnees = $reponse->fetch();
 
-	preg_match_all('([a-zA-Z0-9]{3,30})', $text_tags, $tags);
+	preg_match_all('([a-zA-Z0-9_\-éèêïàôâîç]{3,30})', $text_tags, $tags);
 
 	$bdd->exec("UPDATE ".$table." SET keywords='".$donnees['keywords'].implode(",", $tags[0]).",' WHERE id='".$id."'");
 }
 
 //Recherche
-if (isset($_GET['recherche']) and isset($_GET['champ']) and $_GET['recherche'] != "" and $_GET['champ'] != "")
+if (isset($_GET['recherche']) and isset($_GET['champ']) and $_GET['recherche'] != '' and $_GET['champ'] != '')
 {
 	$recherche = sqlite_escape_string(htmlspecialchars($_GET['recherche']));
 	$champ = sqlite_escape_string(htmlspecialchars($_GET['champ']));
@@ -70,9 +70,9 @@ if (isset($_GET['recherche']) and isset($_GET['champ']) and $_GET['recherche'] !
 }
 else
 {
-	$recherche = "";
-	$champ = "";
-	$search = "";
+	$recherche = '';
+	$champ = '';
+	$search = '';
 }
 
 // Classement
