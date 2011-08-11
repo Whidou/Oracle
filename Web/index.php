@@ -57,6 +57,7 @@ if (isset($_POST['tags']) AND isset($_POST['id']))
 	
 	if ($tags != '')
 	{
+		echo $tags;
 		$reponse = $bdd->query("SELECT keywords FROM ".$table." WHERE id='".$id."'");
 		$donnees = $reponse->fetch();
 	
