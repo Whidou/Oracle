@@ -20,7 +20,7 @@
 				<input type="radio" name="champ" value="chan_orig" id="r_chan" /><label for="r_chan">Salon</label>
 			</div>
 			<div id="valider">
-				<input type="submit" value="Valider" />
+				<input type="submit" value="Valider" id="bouton" />
 			</div>
 			<div id="tri">
 				Trier par<br />
@@ -110,7 +110,7 @@ while ($donnees = $reponse->fetch())
 					<form method="post" action="index.php#row'.$donnees['id'].'">
 						<input type="hidden" name="id" value="'.$donnees['id'].'" />
 						<input type="text" name="tags" />
-						<input type="submit" value="Ajouter"/>
+						<input type="submit" value="Ajouter" id="bouton" />
 					</form>
 				</td>
 			</tr>';
