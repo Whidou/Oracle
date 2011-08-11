@@ -89,7 +89,7 @@ else
 }
 
 //Requête
-$reponse = $bdd->query("SELECT * FROM '".$table."'".$search." ORDER BY ".$classement." DESC LIMIT 0, ".$lines);
+$reponse = $bdd->query("SELECT * FROM '".$table."'".$search." ORDER BY ".$classement." DESC LIMIT 0, ".($lines-1));
 
 // Affichage
 while ($donnees = $reponse->fetch())
@@ -114,7 +114,7 @@ while ($donnees = $reponse->fetch())
 				<td>'.htmlentities(strtr($donnees['keywords'], array("," => ", ")), ENT_QUOTES, 'UTF-8').'</td>
 				<td>'.date('d/m/Y H\hi', $donnees['date']).'</td>
 				<td>
-					<form method="post" action="?recherche='.$recherche.'&champ='.$champ.'&sort='.$classement.'#row'.$donnees['id'].'">
+					<form method="post" action="?recherche='.$recherche.'&amp;champ='.$champ.'&amp;sort='.$classement.'#row'.$donnees['id'].'">
 						<input type="hidden" name="id" value="'.$donnees['id'].'" />
 						<input type="text" name="tags" class="champ" />
 						<input type="submit" value="Ajouter" class="bouton" />
