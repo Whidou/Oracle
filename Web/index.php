@@ -7,9 +7,7 @@
 </head>
 <body>
 	<div id="corps">
-		<div id="titre">
-			<h2> Oracle Recherche, Accepte et Consulte les Liens Etonnants</h2>
-		</div>
+		<h2> Oracle Recherche, Accepte et Consulte les Liens Etonnants</h2>
 		<form method="get" action="#" id="outils">
 			<div id="recherche">
 				Recherche<br />
