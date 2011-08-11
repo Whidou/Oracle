@@ -13,7 +13,7 @@
 		<form method="get" action="#" id="formulaire">
 			<div id="recherche">
 				Recherche :
-				<input type="text" name="recherche" />
+				<input type="text" name="recherche" id="champ_recherche" />
 			</div>
 			<div id="type">
 				Type :
@@ -21,14 +21,14 @@
 				<input type="radio" name="champ" value="auteur" id="r_auteur" /> <label for="r_auteur">Auteur</label>
 				<input type="radio" name="champ" value="chan_orig" id="r_chan" /><label for="r_chan">Salon</label>
 			</div>
+			<div id="valider">
+				<input type="submit" value="Valider" />
+			</div>
 			<div id="tri">
 				Trier par :
 				<input type="radio" name="sort" value="id" id="date" /> <label for="date">Date</label>
 				<input type="radio" name="sort" value="auteur" id="auteur" /> <label for="auteur">Auteur</label>
 				<input type="radio" name="sort" value="chan_orig" id="chan" /> <label for="chan">Salon</label>
-			</div>
-			<div id="valider">
-				<input type="submit" value="Valider" />
 			</div>
 		</form>
 		<table>
