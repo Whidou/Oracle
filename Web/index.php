@@ -26,7 +26,9 @@
 				<input type="radio" name="sort" value="id" id="date" /> <label for="date">Date</label>
 				<input type="radio" name="sort" value="auteur" id="auteur" /> <label for="auteur">Auteur</label>
 				<input type="radio" name="sort" value="chan_orig" id="chan" /> <label for="chan">Salon</label>
-				<input type="submit" value="Go !" />
+			</div>
+			<div id="valider">
+				<input type="submit" value="Valider" />
 			</div>
 		</form>
 		<table>

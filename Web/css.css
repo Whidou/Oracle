@@ -50,7 +50,8 @@ width: 100%
 margin: 0;
 padding: 0;
 float: left;
-width: 33%;
+width: 25%;
+text-align: left;
 }
 
 #type
@@ -58,7 +59,8 @@ width: 33%;
 margin: 0 auto 0;
 padding: 0;
 float: left;
-width: 33%;
+width: 25%;
+text-align: center;
 }
 
 #tri
@@ -66,7 +68,17 @@ width: 33%;
 margin: 0;
 padding: 0;
 float: right;
-width: 33%;
+width: 25%;
+text-align: center;
+}
+
+#valider
+{
+margin: 0 auto 0;
+padding: 0;
+float: right;
+width: 25%;
+text-align: right;
 }
 
 a
