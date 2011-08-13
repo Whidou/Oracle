@@ -30,7 +30,7 @@
 #   - Ajouter des options de recherche
 #   - Gérer plusieurs URLs dans un même message
 
-VERSION = "1.1.10"
+VERSION = "1.1.11"
 
 import re, os, sys, socket, time, sqlite3, urllib
 
@@ -231,25 +231,27 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
     def search(self, msg, match):
         """Searches for an URL with the given tags"""
         chan = self.gettarget(msg)
-        self.db.execute("SELECT link, keywords FROM '%s' WHERE keywords LIKE '%%%s%%'"%(self.name,
-                                                                                        "%%' AND keywords LIKE '%%".join(re.findall("[a-zA-Z0-9_\\-À-ž]{3,30}",
-                                                                                                                                    msg[msg.find(" :!search")+9:]))))
-        fetch = self.db.fetchall()
-        if len(fetch):
-            for result in fetch:
-                self.sendTo(chan, "%s (%s)"%(result[0],
-                                                            result[1][:-1].replace(",", ", ")))
-            url = result[0]
-        else:
-            query = urllib.urlencode({'q' : msg[msg.find("!search ")+8:]})
-            url = 'http://ajax.googleapis.com/ajax/services/search/images?v=1.0&%s'% (query)
-            search_results = urllib.urlopen(url)
-            url = search_results.read()
-            search_results.close()
-            url = url[url.find("\"url\":\"")+7:]
-            url = url[:url.find("\",\"")]
-            self.sendTo(chan, "%s"%url)
-        self.lasturl[chan] = url
+        search = re.findall("[a-zA-Z0-9_\\-À-ž]{3,30}",
+                            msg[msg.find(" :!search")+9:])
+        if len(search):
+            self.db.execute("SELECT link, keywords FROM '%s' WHERE keywords LIKE '%%%s%%'"%(self.name,
+                                                                                            "%%' AND keywords LIKE '%%".join(search)))
+            fetch = self.db.fetchall()
+            if len(fetch):
+                for result in fetch:
+                    self.sendTo(chan, "%s (%s)"%(result[0],
+                                                                result[1][:-1].replace(",", ", ")))
+                url = result[0]
+            else:
+                query = urllib.urlencode({'q' : msg[msg.find("!search ")+8:]})
+                url = 'http://ajax.googleapis.com/ajax/services/search/images?v=1.0&%s'% (query)
+                search_results = urllib.urlopen(url)
+                url = search_results.read()
+                search_results.close()
+                url = url[url.find("\"url\":\"")+7:]
+                url = url[:url.find("\",\"")]
+                self.sendTo(chan, "%s"%url)
+            self.lasturl[chan] = url
 
     def last(self, msg, match):
         """Searches for an URL with the given tags"""
