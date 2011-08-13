@@ -28,8 +28,9 @@
 #   - Ajouter une gestion des exceptions.
 #   - Ajuster la création de bdd aux systèmes non-UNIX
 #   - Ajouter des options de recherche
+#   - Gérer plusieurs URLs dans un même message
 
-VERSION = "1.1.8"
+VERSION = "1.1.9"
 
 import re, os, sys, socket, time, sqlite3, urllib
 
@@ -189,7 +190,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
         """Adds tag(s) to last URL"""
         chan = self.gettarget(msg)
         if self.lasturl.has_key(chan):
-            newtags = re.findall("[a-zA-Z0-9_\\-éèêïàôâîçû]{3,30}", msg[msg.find(" :"):])
+            newtags = re.findall("[a-zA-Z0-9_\\-À-ž]{3,30}", msg[msg.find(" :"):])
             if len(newtags):
                 self.db.execute("SELECT keywords FROM %s WHERE link='%s'"%(self.name,
                                                                            self.lasturl[chan]))
@@ -218,7 +219,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
             self.db.execute("SELECT keywords FROM %s WHERE link='%s'"%(self.name,
                                                                        self.lasturl[chan]))
             tags = self.db.fetchall()[0][0].split(",")
-            for deleted in re.findall("[a-zA-Z0-9_\\-éèêïàôâîçû]{1,30}", msg[msg.find(" :"):]):
+            for deleted in re.findall("[a-zA-Z0-9_\\-À-ž]{1,30}", msg[msg.find(" :"):]):
                 for tag in tags[::-1]:
                     if tag.lower() == deleted.lower() or tag == "":
                         tags.remove(tag)
@@ -231,7 +232,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
         """Searches for an URL with the given tags"""
         chan = self.gettarget(msg)
         self.db.execute("SELECT link, keywords FROM '%s' WHERE keywords LIKE '%%%s%%'"%(self.name,
-                                                                                      "%%' AND keywords LIKE '%%".join(re.findall("[a-zA-Z0-9_\\-éèêïàôâîç]{2,30}",
+                                                                                      "%%' AND keywords LIKE '%%".join(re.findall("[a-zA-Z0-9_\\-À-ž]{2,30}",
                                                                                                                                  msg[msg.find(" :!search")+9:]))))
         fetch = self.db.fetchall()
         if len(fetch):
