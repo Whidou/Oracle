@@ -30,7 +30,7 @@
 #   - Ajouter des options de recherche
 #   - Gérer plusieurs URLs dans un même message
 
-VERSION = "1.1.9"
+VERSION = "1.1.10"
 
 import re, os, sys, socket, time, sqlite3, urllib
 
@@ -232,8 +232,8 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
         """Searches for an URL with the given tags"""
         chan = self.gettarget(msg)
         self.db.execute("SELECT link, keywords FROM '%s' WHERE keywords LIKE '%%%s%%'"%(self.name,
-                                                                                      "%%' AND keywords LIKE '%%".join(re.findall("[a-zA-Z0-9_\\-À-ž]{2,30}",
-                                                                                                                                 msg[msg.find(" :!search")+9:]))))
+                                                                                        "%%' AND keywords LIKE '%%".join(re.findall("[a-zA-Z0-9_\\-À-ž]{3,30}",
+                                                                                                                                    msg[msg.find(" :!search")+9:]))))
         fetch = self.db.fetchall()
         if len(fetch):
             for result in fetch:
