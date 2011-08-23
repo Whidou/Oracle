@@ -30,7 +30,7 @@
 #   - Ajouter des options de recherche
 #   - Gérer plusieurs URLs dans un même message
 
-VERSION = "1.1.11"
+VERSION = "1.1.12"
 
 import re, os, sys, socket, time, sqlite3, urllib
 
@@ -272,7 +272,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
         if msg[-9:] == " :!delete" and self.lasturl.has_key(chan):
             if self.lasturl[chan]!="":
                 url = self.lasturl[chan]
-            del self.lasturl[chan]
+                self.lasturl[chan]="" # Correction du ticket #2
         else:                           # Si une URL est fournie
             url = msg[msg.find("!delete ")+8:]
         self.db.execute("DELETE FROM %s WHERE link='%s'"%(self.name,
