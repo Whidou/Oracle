@@ -30,7 +30,7 @@
 #   - Ajouter des options de recherche
 #   - Gérer plusieurs URLs dans un même message
 
-VERSION = "1.1.12"
+VERSION = "1.2.0"
 
 import re, os, sys, socket, time, sqlite3, urllib
 
@@ -41,7 +41,10 @@ class Oracle:
 
     def __init__(self, network, chan, name="Oracle", database=None):
         self.network = str(network)
-        self.chan = [str(chan)]
+        if ',' in str(chan):
+            self.chan=str(chan).split(',')
+        else:
+            self.chan = [str(chan)]
         self.name = str(name)
         self.configure()
         self.irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -135,7 +138,8 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
 
     def join(self, msg, match):
         """Joins a new channel on startup"""
-        self.sendToServ("JOIN %s"%self.chan[0])
+        for chan in self.chan:
+            self.sendToServ("JOIN %s"%chan)
 
     def gettarget(self, msg):
         """Obtains sender's name from message"""
