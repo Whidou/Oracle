@@ -1,4 +1,4 @@
-﻿#!/usr/bin/python
+﻿#!/usr/bin/python2.7
 # -*- Coding: Utf-8 -*-
 
 ###########################################################################
@@ -30,7 +30,7 @@
 #   - Ajouter des options de recherche
 #   - Gérer plusieurs URLs dans un même message
 
-VERSION = "1.2.0"
+VERSION = "1.3.0"
 
 import re, os, sys, socket, time, sqlite3, urllib
 
@@ -50,6 +50,7 @@ class Oracle:
         self.irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.stop()
         self.lasturl={}
+        self.watch=True
         if not database:
             oraclePath = os.path.join(os.path.expanduser("~"), ".Oracle")
             if not os.path.exists(oraclePath):
@@ -90,6 +91,8 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
                        "(?i)PRIVMSG .*? :!-.*$":self.tagdel,
                        "(?i)PRIVMSG .*? :!search .*$":self.search,
                        "(?i)PRIVMSG .*? :!last$":self.last,
+                       "(?i)PRIVMSG .*? :!stop$":self.stopwatch,
+                       "(?i)PRIVMSG .*? :!start$":self.startwatch,
                            # " [a-z0-9]+" Un espace suivi d'au moins un caractère alphanumérique
                            # "+" Répété au moins une fois
                        " :End of /MOTD command\\.":self.join,
@@ -170,67 +173,70 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
 
     def url(self, msg, match):
         """Detects and stores URLs"""
-        chan = self.gettarget(msg)
-        if (msg.find("PRIVMSG %s :!"%chan) == -1) and (chan.lower() in map(str.lower, self.chan)): # Ne réponds pas aux messages privés ni aux commandes comme !delete
-            url = msg[match[0]:match[1]]
-            # Ajout d'une méthode de vérification de la présence des liens dans la base.
-            self.db.execute("SELECT link, keywords FROM %s WHERE link='%s'"%(self.name, # Nom du bot/de la table
-                                                                             url))      # URL
-            fetch = self.db.fetchall()
-            if fetch == []:
-                self.db.execute("INSERT INTO %s VALUES (NULL,'%s','%s', '%s', '', %i);"%(self.name,                 # Nom du bot/de la table
-                                                                                         chan,                      # Chan
-                                                                                         msg[1:msg.find("!")],      # Pseudo du posteur
-                                                                                         url,                       # URL
-                                                                                         int(time.time())))         # Timestamp
-                self.conn.commit()
-            else:
-                #Ligne envoyée au chan si le lien est déjà présent.
-                self.sendTo(chan,fetch[0][1].replace(",", ", ")[:-2])
-            self.lasturl[chan] = url # Stockage de l'url dans la "case" correspondant au chan
-            self.tagadd("PRIVMSG %s :%s"%(chan, msg[match[1]:]), (0, 0))
+        if self.watch:
+            chan = self.gettarget(msg)
+            if (msg.find("PRIVMSG %s :!"%chan) == -1) and (chan.lower() in map(str.lower, self.chan)): # Ne réponds pas aux messages privés ni aux commandes comme !delete
+                url = msg[match[0]:match[1]]
+                # Ajout d'une méthode de vérification de la présence des liens dans la base.
+                self.db.execute("SELECT link, keywords FROM %s WHERE link='%s'"%(self.name, # Nom du bot/de la table
+                                                                                 url))      # URL
+                fetch = self.db.fetchall()
+                if fetch == []:
+                    self.db.execute("INSERT INTO %s VALUES (NULL,'%s','%s', '%s', '', %i);"%(self.name,                 # Nom du bot/de la table
+                                                                                             chan,                      # Chan
+                                                                                             msg[1:msg.find("!")],      # Pseudo du posteur
+                                                                                             url,                       # URL
+                                                                                             int(time.time())))         # Timestamp
+                    self.conn.commit()
+                else:
+                    #Ligne envoyée au chan si le lien est déjà présent.
+                    self.sendTo(chan,fetch[0][1].replace(",", ", ")[:-2])
+                self.lasturl[chan] = url # Stockage de l'url dans la "case" correspondant au chan
+                self.tagadd("PRIVMSG %s :%s"%(chan, msg[match[1]:]), (0, 0))
 
     def tagadd(self, msg, match):
         """Adds tag(s) to last URL"""
-        chan = self.gettarget(msg)
-        if self.lasturl.has_key(chan):
-            newtags = re.findall("[a-zA-Z0-9_\\-À-ž]{3,30}", msg[msg.find(" :"):])
-            if len(newtags):
-                self.db.execute("SELECT keywords FROM %s WHERE link='%s'"%(self.name,
-                                                                           self.lasturl[chan]))
-                fetch = self.db.fetchall()
-                if len(fetch):
-                    tags = []
-                    for tag in fetch[0][0].split(",") + newtags:
-                        if tag.lower() not in map(str.lower, tags) and tag != "":
-                            tags.append(tag)
-                    self.db.execute("UPDATE %s SET keywords='%s,' WHERE link='%s'"%(self.name,
-                                                                                   ','.join(tags),
-                                                                                   self.lasturl[chan]))
-                else:
-                    self.db.execute("INSERT INTO %s VALUES (NULL,'%s','%s', '%s', '%s,', %i);"%(self.name,               # Nom du bot/de la table
-                                                                                                chan,                    # Chan
-                                                                                                msg[1:msg.find("!")],    # Pseudo du posteur
-                                                                                                self.lasturl[chan],      # URL
-                                                                                                ','.join(newtags),       # Tags
-                                                                                                int(time.time())))       # Timestamp
-                self.conn.commit()
+        if self.watch:
+            chan = self.gettarget(msg)
+            if self.lasturl.has_key(chan):
+                newtags = re.findall("[a-zA-Z0-9_\\-À-ž]{3,30}", msg[msg.find(" :"):])
+                if len(newtags):
+                    self.db.execute("SELECT keywords FROM %s WHERE link='%s'"%(self.name,
+                                                                               self.lasturl[chan]))
+                    fetch = self.db.fetchall()
+                    if len(fetch):
+                        tags = []
+                        for tag in fetch[0][0].split(",") + newtags:
+                            if tag.lower() not in map(str.lower, tags) and tag != "":
+                                tags.append(tag)
+                        self.db.execute("UPDATE %s SET keywords='%s,' WHERE link='%s'"%(self.name,
+                                                                                       ','.join(tags),
+                                                                                       self.lasturl[chan]))
+                    else:
+                        self.db.execute("INSERT INTO %s VALUES (NULL,'%s','%s', '%s', '%s,', %i);"%(self.name,               # Nom du bot/de la table
+                                                                                                    chan,                    # Chan
+                                                                                                    msg[1:msg.find("!")],    # Pseudo du posteur
+                                                                                                    self.lasturl[chan],      # URL
+                                                                                                    ','.join(newtags),       # Tags
+                                                                                                    int(time.time())))       # Timestamp
+                    self.conn.commit()
 
     def tagdel(self, msg, match):
         """Deletes tag(s) from last URL"""
-        chan = self.gettarget(msg)
-        if self.lasturl.has_key(chan):
-            self.db.execute("SELECT keywords FROM %s WHERE link='%s'"%(self.name,
-                                                                       self.lasturl[chan]))
-            tags = self.db.fetchall()[0][0].split(",")
-            for deleted in re.findall("[a-zA-Z0-9_\\-À-ž]{1,30}", msg[msg.find(" :"):]):
-                for tag in tags[::-1]:
-                    if tag.lower() == deleted.lower() or tag == "":
-                        tags.remove(tag)
-            self.db.execute("UPDATE %s SET keywords='%s,' WHERE link='%s'"%(self.name,
-                                                                           ','.join(tags),
+        if self.watch:
+            chan = self.gettarget(msg)
+            if self.lasturl.has_key(chan):
+                self.db.execute("SELECT keywords FROM %s WHERE link='%s'"%(self.name,
                                                                            self.lasturl[chan]))
-            self.conn.commit()
+                tags = self.db.fetchall()[0][0].split(",")
+                for deleted in re.findall("[a-zA-Z0-9_\\-À-ž]{1,30}", msg[msg.find(" :"):]):
+                    for tag in tags[::-1]:
+                        if tag.lower() == deleted.lower() or tag == "":
+                            tags.remove(tag)
+                self.db.execute("UPDATE %s SET keywords='%s,' WHERE link='%s'"%(self.name,
+                                                                               ','.join(tags),
+                                                                               self.lasturl[chan]))
+                self.conn.commit()
 
     def search(self, msg, match):
         """Searches for an URL with the given tags"""
@@ -283,6 +289,18 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
                                                           url))
         self.conn.commit()
 
+    def stopwatch(self,msg,match):
+        if self.watch:
+            self.watch=False
+        else:
+            self.sendTo(self.gettarget(msg),"Detection des URLs déjà arettée.")
+
+    def startwatch(self,msg,match):
+        if self.watch:
+            self.sendTo(self.gettarget(msg),"Detection des URLs déjà en cours.")
+        else:
+            self.watch=True
+
     def help(self, msg, match):
         """Displays a minimal manual"""
         self.sendTo(self.gettarget(msg),"""!help : Displays this message.
@@ -292,6 +310,8 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
 !- tag1 tag2 : Removes tags from the last link.
 !search tag1 tag2 : Searches links linked to tag1 AND tag2.
 !last : Displays last link.
+!stop : Stops URL watching.
+!start : Starts URL watching.
 !goto #foo : Goes to #foo.
 !quit : Leaves current channel.""")
         
