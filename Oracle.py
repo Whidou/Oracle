@@ -30,7 +30,7 @@
 #   - Ajouter des options de recherche
 #   - Gérer plusieurs URLs dans un même message
 
-VERSION = "1.3.0"
+VERSION = "1.3.1"
 
 import re, os, sys, socket, time, sqlite3, urllib
 
@@ -266,14 +266,15 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
     def last(self, msg, match):
         """Searches for an URL with the given tags"""
         chan = self.gettarget(msg)
-        url = self.lasturl[chan]
-        if url != "":
-            self.db.execute("SELECT keywords FROM '%s' WHERE link='%s'"%(self.name,
-                                                                         url))
-            fetch = self.db.fetchall()
-            if len(fetch):
-                keywords = " (" + fetch[0][0][:-1].replace(",", ", ") + ")"
-            self.sendTo(chan, "%s%s"%(url, keywords))
+        if self.lasturl.has_key(chan):
+            url = self.lasturl[chan]
+            if url != "":
+                self.db.execute("SELECT keywords FROM '%s' WHERE link='%s'"%(self.name,
+                                                                             url))
+                fetch = self.db.fetchall()
+                if len(fetch):
+                    keywords = " (" + fetch[0][0][:-1].replace(",", ", ") + ")"
+                self.sendTo(chan, "%s%s"%(url, keywords))
 
     def delete(self, msg, match):
         """Deletes a previously added url"""
