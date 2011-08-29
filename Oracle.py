@@ -30,7 +30,7 @@
 #   - Ajouter des options de recherche
 #   - Gérer plusieurs URLs dans un même message
 
-VERSION = "1.3.1"
+VERSION = "1.3.2"
 
 import re, os, sys, socket, time, sqlite3, urllib
 
@@ -293,6 +293,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
     def stopwatch(self,msg,match):
         if self.watch:
             self.watch=False
+            self.sendToServ("NICK %s[pause]"%self.name)
         else:
             self.sendTo(self.gettarget(msg),"Detection des URLs déjà arettée.")
 
@@ -301,6 +302,7 @@ date INTEGER);'|sqlite3 %s"%(self.name, database)) # Unix only
             self.sendTo(self.gettarget(msg),"Detection des URLs déjà en cours.")
         else:
             self.watch=True
+            self.sendToServ("NICK %s"%self.name)
 
     def help(self, msg, match):
         """Displays a minimal manual"""
