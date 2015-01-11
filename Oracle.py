@@ -1,4 +1,4 @@
-﻿#!/usr/bin/python2
+﻿#!/usr/bin/python
 # -*- Coding: Utf-8 -*-
 
 ###############################################################################
@@ -30,15 +30,29 @@
 # Ajouter des options de recherche
 # Gérer plusieurs URLs dans un même message
 
-VERSION = "1.3.3"
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 
-import re
 import os
-import sys
+import re
 import socket
-import time
 import sqlite3
-import urllib
+import sys
+import time
+
+try:
+    import urllib.request
+    import urllib.parse
+    import urllib.error
+except ImportError:
+    import urllib
+    urllib.parse = urllib
+    urllib.request = urllib
+
+
+VERSION = "1.3.3"
 
 
 class Oracle:
@@ -98,10 +112,11 @@ date INTEGER);'|sqlite3 %s" % (self.name, database))  # Unix only
         if not self.go:
             self.go = True
             self.irc.connect((self.network, 6667))
-            self.sendToServ("NICK %s" % self.name)
+            self.sendToServ("NICK {}".format(self.name))
             self.sendToServ("USER %s %s_2 %s_3 :%s" % ((self.name, )*4))
             while self.go:
-                data = re.split("\r|\n", self.irc.recv(4096))
+                data = re.split("\r|\n", self.irc.recv(4096).decode("utf-8",
+                                                                    "ignore"))
                 for i in data:
                     for j in self.orders:
                         match = re.search(j, i)
@@ -115,13 +130,13 @@ date INTEGER);'|sqlite3 %s" % (self.name, database))  # Unix only
     def sendTo(self, target, message):
         """Sends a message to the choosen target"""
         for i in re.split("\r|\n", str(message)):
-            for j in range(1 + len(i)/400):
+            for j in range(1 + len(i)//400):
                 self.sendToServ("PRIVMSG %s :%s" % (target,
                                                     i[400 * j:400 * (j + 1)]))
 
     def sendToServ(self, line):
         """Sends a message to the server"""
-        self.irc.send("%s\n" % str(line))
+        self.irc.send("{}\n".format(line).encode("utf-8"))
 
     def stop(self, *args):
         """Stops the main loop"""
@@ -146,7 +161,7 @@ date INTEGER);'|sqlite3 %s" % (self.name, database))  # Unix only
     def goto(self, msg, match):
         """Joins another channel"""
         target = msg.split()[-1]
-        if target.lower() not in map(str.lower, self.chan):
+        if target.lower() not in (x.lower() for x in self.chan):
             self.chan.append(target)
             self.sendToServ("JOIN %s" % target)
             self.lasturl[target] = ""
@@ -154,7 +169,7 @@ date INTEGER);'|sqlite3 %s" % (self.name, database))  # Unix only
     def bye(self, msg, match):
         """Quits current channel"""
         target = self.gettarget(msg)
-        if target.lower() in map(str.lower, self.chan):
+        if target.lower() in (x.lower() for x in self.chan):
             self.sendToServ("PART %s :All your link are belong to us." %
                             target)
             del self.lasturl[target]
@@ -170,7 +185,7 @@ date INTEGER);'|sqlite3 %s" % (self.name, database))  # Unix only
             chan = self.gettarget(msg)
             # Ne réponds pas aux messages privés
             if (msg.find("PRIVMSG %s :!" % chan) == -1) and \
-               (chan.lower() in map(str.lower, self.chan)):
+               (chan.lower() in (x.lower() for x in self.chan)):
                 url = msg[match[0]:match[1]]
                 # Vérification de la présence des liens
                 self.db.execute("SELECT link, keywords FROM %s WHERE link=?" %
@@ -203,7 +218,9 @@ date INTEGER);'|sqlite3 %s" % (self.name, database))  # Unix only
                     if len(fetch):
                         tags = []
                         for tag in fetch[0][0].split(",") + newtags:
-                            if tag.lower() not in map(str.lower, tags + [""]):
+                            if tag == "":
+                                continue
+                            if tag.lower() not in (x.lower() for x in tags):
                                 tags.append(tag)
                         self.db.execute("UPDATE %s SET keywords=?\
                                          WHERE link=?" %
@@ -257,11 +274,12 @@ date INTEGER);'|sqlite3 %s" % (self.name, database))  # Unix only
                                                                     ", ")))
                 url = result[0]
             else:
-                query = urllib.urlencode({'q': msg[msg.find("!search ") + 8:]})
+                msg = msg[msg.find("!search ") + 8:]
+                query = urllib.parse.urlencode({'q': msg})
                 url = "http://ajax.googleapis.com/ajax/services/search/images\
 ?v=1.0&%s" % (query)
-                search_results = urllib.urlopen(url)
-                url = search_results.read()
+                search_results = urllib.request.urlopen(url)
+                url = search_results.read().decode("utf-8", "ignore")
                 search_results.close()
                 url = url[url.find("\"url\":\"") + 7:]
                 url = url[:url.find("\",\"")]
